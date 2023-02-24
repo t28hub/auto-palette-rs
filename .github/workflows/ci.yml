@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '*.md'
+      - '*.txt'
+  pull_request:
+    paths-ignore:
+      - '*.md'
+      - '*.txt'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+
+      - name: Check dependencies
+        run: cargo check
+
+      - name: Check code format
+        run: cargo fmt --all -- --check
+
+      - name: Check code format
+        run: cargo clippy -- -D warnings
+
+      - name: Run tests
+        run: cargo test
+
+      - name: Build auto-palette-rs
+        run: cargo build --lib --release
+

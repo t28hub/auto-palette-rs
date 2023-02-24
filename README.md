@@ -1,5 +1,7 @@
 auto-palette-rs
 =====
+[![GitHub Actions](https://github.com/t28hub/auto-palette-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/t28hub/auto-palette-rs/actions/workflows/ci.yml)
+
 A Rust library for extracting a color palette from an image automatically.
 
 ## 📜License
