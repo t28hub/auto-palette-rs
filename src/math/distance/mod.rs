@@ -1,12 +1,13 @@
 use crate::math::number::FloatNumber;
+use crate::math::point::Point;
 
-pub mod euclidean;
+pub(crate) mod euclidean;
 
 /// A trait for computing the distance between two points.
-pub trait Distance<F, T>: Default
-    where
-        F: FloatNumber,
+pub trait DistanceMeasure<F>: Default
+where
+    F: FloatNumber,
 {
     /// Compute the distance between two points.
-    fn measure(&self, lhs: T, rhs: T) -> F;
+    fn measure<const N: usize>(&self, lhs: &Point<F, N>, rhs: &Point<F, N>) -> F;
 }
