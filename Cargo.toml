@@ -8,3 +8,4 @@ description = "A Rust library for extracting a color palette from an image autom
 repository = "https://github.com/t28hub/auto-palette-rs"
 
 [dependencies]
+num-traits = "0.2.15"
