@@ -1,0 +1,10 @@
+[package]
+name = "auto-palette-rs"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Tatsuya Maki <t28oogle@gmail.com>"]
+description = "A Rust library for extracting a color palette from an image automatically."
+repository = "https://github.com/t28hub/auto-palette-rs"
+
+[dependencies]
