@@ -10,7 +10,7 @@ where
     D: DistanceMeasure<F>,
 {
     dataset: &'a Vec<Point<F, N>>,
-    distance: D,
+    distance: &'a D,
 }
 
 impl<'a, F, D, const N: usize> LinearSearch<'a, F, D, N>
@@ -18,7 +18,7 @@ where
     F: FloatNumber,
     D: DistanceMeasure<F>,
 {
-    pub fn new(dataset: &'a Vec<Point<F, N>>, distance: D) -> Self {
+    pub fn new(dataset: &'a Vec<Point<F, N>>, distance: &'a D) -> Self {
         Self { dataset, distance }
     }
 }
@@ -66,7 +66,8 @@ mod tests {
     #[test]
     fn search_should_return_neighbors() {
         let dataset = vec![];
-        let linear_search = LinearSearch::new(&dataset, SquaredEuclideanDistance::default());
+        let distance = SquaredEuclideanDistance::default();
+        let linear_search = LinearSearch::new(&dataset, &distance);
         assert_eq!(linear_search.search(&Point2::new(3.0, 3.0), 0), vec![]);
 
         let dataset = vec![
@@ -76,7 +77,7 @@ mod tests {
             Point2::new(5.0, 5.0),
             Point2::new(2.0, 4.0),
         ];
-        let linear_search = LinearSearch::new(&dataset, SquaredEuclideanDistance::default());
+        let linear_search = LinearSearch::new(&dataset, &distance);
         assert_eq!(linear_search.search(&Point2::new(3.0, 3.0), 0), vec![]);
         assert_eq!(
             linear_search.search(&Point2::new(3.0, 3.0), 3),
@@ -111,7 +112,8 @@ mod tests {
     #[test]
     fn search_nearest_should_return_nearest_neighbor() {
         let dataset = vec![];
-        let linear_search = LinearSearch::new(&dataset, SquaredEuclideanDistance::default());
+        let distance = SquaredEuclideanDistance::default();
+        let linear_search = LinearSearch::new(&dataset, &distance);
         assert_eq!(linear_search.search_nearest(&Point2::new(0.0, 1.0)), None);
 
         let dataset = vec![
@@ -120,7 +122,7 @@ mod tests {
             Point2::new(5.0, 5.0),
             Point2::new(2.0, 4.0),
         ];
-        let linear_search = LinearSearch::new(&dataset, SquaredEuclideanDistance::default());
+        let linear_search = LinearSearch::new(&dataset, &distance);
         assert_eq!(
             linear_search.search_nearest(&Point2::new(2.0, 3.0)),
             Some(Neighbor::new(3, 1.0))

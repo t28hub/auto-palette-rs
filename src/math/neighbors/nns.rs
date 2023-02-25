@@ -49,12 +49,12 @@ mod tests {
 
     #[test]
     fn new_should_create_neighbor() {
-        let neighbor = Neighbor::new(3, 2.0.sqrt());
+        let neighbor = Neighbor::new(3, 2.0_f32.sqrt());
         assert_eq!(
             neighbor,
             Neighbor {
                 index: 3,
-                distance: 2.0.sqrt()
+                distance: 2.0_f32.sqrt()
             }
         );
     }

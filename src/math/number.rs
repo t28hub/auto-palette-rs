@@ -1,10 +1,21 @@
-use num_traits::{Float, Num};
+use num_traits::{Float, FromPrimitive, Num, ToPrimitive};
 use std::fmt::Debug;
 use std::ops::{AddAssign, DivAssign, MulAssign, RemAssign, SubAssign};
 
 /// Basic number trait
 pub trait Number:
-    Copy + Clone + Debug + Num + PartialOrd + AddAssign + SubAssign + MulAssign + DivAssign + RemAssign
+    Copy
+    + Clone
+    + Debug
+    + Num
+    + PartialOrd
+    + AddAssign
+    + SubAssign
+    + MulAssign
+    + DivAssign
+    + RemAssign
+    + FromPrimitive
+    + ToPrimitive
 {
 }
 
@@ -19,6 +30,8 @@ impl<T> Number for T where
         + MulAssign
         + DivAssign
         + RemAssign
+        + FromPrimitive
+        + ToPrimitive
 {
 }
 

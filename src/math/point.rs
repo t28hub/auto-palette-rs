@@ -1,11 +1,13 @@
 use crate::math::number::FloatNumber;
+use num_traits::Zero;
+use std::cell::RefCell;
 use std::fmt::{Debug, Display, Formatter, Result};
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, Sub};
 
 /// A point in n-dimensional space.
-#[derive(PartialEq, Eq, Clone, Hash, Debug)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub struct Point<F: FloatNumber, const N: usize> {
-    components: Vec<F>,
+    components: RefCell<Vec<F>>,
 }
 
 impl<F, const N: usize> Point<F, N>
@@ -19,7 +21,7 @@ where
 
     /// Returns the vec representation of this point.
     pub fn to_vec(&self) -> Vec<F> {
-        self.components.clone()
+        self.components.borrow().to_vec()
     }
 }
 
@@ -28,7 +30,22 @@ where
     F: FloatNumber,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "Point{}{:?}", N, self.components)
+        write!(f, "Point{}{:?}", N, self.components.borrow())
+    }
+}
+
+impl<F, const N: usize> Zero for Point<F, N>
+where
+    F: FloatNumber,
+{
+    fn zero() -> Self {
+        Self {
+            components: RefCell::new(vec![F::zero(); N]),
+        }
+    }
+
+    fn is_zero(&self) -> bool {
+        self.components.borrow().iter().all(|value| value.is_zero())
     }
 }
 
@@ -39,13 +56,16 @@ where
     type Output = Self;
 
     fn add(self, other: Self) -> Self::Output {
-        let components = self
-            .components
+        let components1 = self.components.borrow();
+        let components2 = other.components.borrow();
+        let components = components1
             .iter()
-            .zip(other.components)
-            .map(|(value1, value2)| value1.add(value2))
+            .zip(components2.iter())
+            .map(|(value1, value2)| *value1 + *value2)
             .collect();
-        Self { components }
+        Self {
+            components: RefCell::new(components),
+        }
     }
 }
 
@@ -56,13 +76,42 @@ where
     type Output = Point<F, N>;
 
     fn add(self, other: Self) -> Self::Output {
-        let components = self
-            .components
+        let components1 = self.components.borrow();
+        let components2 = other.components.borrow();
+        let components = components1
             .iter()
-            .zip(other.components.iter())
+            .zip(components2.iter())
             .map(|(value1, value2)| *value1 + *value2)
             .collect();
-        Self::Output { components }
+        Self::Output {
+            components: RefCell::new(components),
+        }
+    }
+}
+
+impl<F, const N: usize> AddAssign for Point<F, N>
+where
+    F: FloatNumber,
+{
+    fn add_assign(&mut self, rhs: Self) {
+        self.components
+            .borrow_mut()
+            .iter_mut()
+            .zip(rhs.components.borrow().iter())
+            .for_each(|(value1, value2)| value1.add_assign(*value2));
+    }
+}
+
+impl<F, const N: usize> AddAssign for &Point<F, N>
+where
+    F: FloatNumber,
+{
+    fn add_assign(&mut self, rhs: Self) {
+        self.components
+            .borrow_mut()
+            .iter_mut()
+            .zip(rhs.components.borrow().iter())
+            .for_each(|(value1, value2)| value1.add_assign(*value2));
     }
 }
 
@@ -72,14 +121,17 @@ where
 {
     type Output = Self;
 
-    fn sub(self, ohter: Self) -> Self::Output {
-        let components = self
-            .components
+    fn sub(self, other: Self) -> Self::Output {
+        let components1 = self.components.borrow();
+        let components2 = other.components.borrow();
+        let components = components1
             .iter()
-            .zip(ohter.components)
-            .map(|(value1, value2)| value1.sub(value2))
+            .zip(components2.iter())
+            .map(|(value1, value2)| value1.sub(*value2))
             .collect();
-        Self { components }
+        Self {
+            components: RefCell::new(components),
+        }
     }
 }
 
@@ -90,13 +142,16 @@ where
     type Output = Point<F, N>;
 
     fn sub(self, other: Self) -> Self::Output {
-        let components = self
-            .components
+        let components1 = self.components.borrow();
+        let components2 = other.components.borrow();
+        let components = components1
             .iter()
-            .zip(other.components.iter())
-            .map(|(value1, value2)| *value1 - *value2)
+            .zip(components2.iter())
+            .map(|(value1, value2)| value1.sub(*value2))
             .collect();
-        Self::Output { components }
+        Self::Output {
+            components: RefCell::new(components),
+        }
     }
 }
 
@@ -107,12 +162,11 @@ where
     type Output = Self;
 
     fn mul(self, scalar: F) -> Self::Output {
-        let components = self
-            .components
-            .iter()
-            .map(|value| value.mul(scalar))
-            .collect();
-        Self { components }
+        let components1 = self.components.borrow();
+        let components = components1.iter().map(|value| value.mul(scalar)).collect();
+        Self {
+            components: RefCell::new(components),
+        }
     }
 }
 
@@ -123,12 +177,11 @@ where
     type Output = Point<F, N>;
 
     fn mul(self, scalar: F) -> Self::Output {
-        let components = self
-            .components
-            .iter()
-            .map(|value| value.mul(scalar))
-            .collect();
-        Self::Output { components }
+        let components1 = self.components.borrow();
+        let components = components1.iter().map(|value| value.mul(scalar)).collect();
+        Self::Output {
+            components: RefCell::new(components),
+        }
     }
 }
 
@@ -140,12 +193,11 @@ where
 
     fn div(self, scalar: F) -> Self::Output {
         assert!(!scalar.is_zero());
-        let components = self
-            .components
-            .iter()
-            .map(|value| value.div(scalar))
-            .collect();
-        Self { components }
+        let components1 = self.components.borrow();
+        let components = components1.iter().map(|value| value.div(scalar)).collect();
+        Self {
+            components: RefCell::new(components),
+        }
     }
 }
 
@@ -157,12 +209,24 @@ where
 
     fn div(self, scalar: F) -> Self::Output {
         assert!(!scalar.is_zero());
-        let components = self
-            .components
-            .iter()
-            .map(|value| value.div(scalar))
-            .collect();
-        Self::Output { components }
+        let components1 = self.components.borrow();
+        let components = components1.iter().map(|value| value.div(scalar)).collect();
+        Self::Output {
+            components: RefCell::new(components),
+        }
+    }
+}
+
+impl<F, const N: usize> DivAssign<F> for Point<F, N>
+where
+    F: FloatNumber,
+{
+    fn div_assign(&mut self, scalar: F) {
+        assert!(!scalar.is_zero());
+        let mut components = self.components.borrow_mut();
+        components.iter_mut().for_each(|value| {
+            *value /= scalar;
+        });
     }
 }
 
@@ -174,7 +238,7 @@ where
 {
     pub fn new(x: F, y: F) -> Self {
         Self {
-            components: vec![x, y],
+            components: RefCell::new(vec![x, y]),
         }
     }
 }
@@ -187,7 +251,7 @@ where
 {
     pub fn new(x: F, y: F, z: F) -> Self {
         Self {
-            components: vec![x, y, z],
+            components: RefCell::new(vec![x, y, z]),
         }
     }
 }
@@ -195,22 +259,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn new_should_create_vector() {
-        assert_eq!(
-            Point2::new(1.0, 2.0),
-            Point {
-                components: vec![1.0, 2.0]
-            }
-        );
-        assert_eq!(
-            Point3::new(1.0, 2.0, 3.0),
-            Point {
-                components: vec![1.0, 2.0, 3.0]
-            }
-        );
-    }
 
     #[test]
     fn dim_should_return_dimension() {
