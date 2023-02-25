@@ -1,10 +1,11 @@
+use crate::math::clustering::kmeans::initializer::CentroidInitializer;
 use crate::math::distance::DistanceMeasure;
 use crate::math::neighbors::linear::LinearSearch;
 use crate::math::neighbors::nns::NearestNeighborSearch;
 use crate::math::number::FloatNumber;
 use crate::math::point::Point;
 use num_traits::Zero;
-use rand::{Rng, RngCore};
+use rand::RngCore;
 use std::marker::PhantomData;
 use std::ops::{AddAssign, DivAssign};
 
@@ -54,7 +55,7 @@ where
     max_iter: usize,
     tolerance: F,
     distance: D,
-    rng: R,
+    initializer: CentroidInitializer<R>,
 }
 
 impl<F, D, R, const N: usize> Kmeans<F, D, R, N>
@@ -63,33 +64,15 @@ where
     D: DistanceMeasure<F>,
     R: RngCore,
 {
-    pub fn new(k: usize, distance: D, rng: R) -> Self {
+    pub(crate) fn new(k: usize, distance: D, initializer: CentroidInitializer<R>) -> Self {
         Self {
             _f: PhantomData::default(),
             k,
             max_iter: 10,
             tolerance: F::from(0.01).unwrap(),
             distance,
-            rng,
+            initializer,
         }
-    }
-
-    fn initialize_centroids(&mut self, dataset: &[Point<F, N>]) -> Vec<Point<F, N>> {
-        let mut selected = vec![false; dataset.len()];
-        let mut centroids = Vec::with_capacity(self.k);
-        while centroids.len() < self.k {
-            let index = self.rng.gen_range(0..dataset.len());
-            if selected[index] {
-                continue;
-            }
-
-            let point = dataset.get(index);
-            if let Some(centroid) = point {
-                selected.insert(index, true);
-                centroids.push(centroid.clone());
-            }
-        }
-        centroids
     }
 }
 
@@ -109,7 +92,8 @@ where
         }
 
         let mut clusters: Vec<Cluster<F, N>> = self
-            .initialize_centroids(dataset)
+            .initializer
+            .initialize(dataset, self.k, &self.distance)
             .into_iter()
             .map(|centroid| Cluster::new(centroid))
             .collect();
@@ -164,6 +148,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::math::clustering::kmeans::initializer::CentroidInitializer::KmeansPlusPlus;
     use crate::math::distance::euclidean::SquaredEuclideanDistance;
     use crate::math::point::Point2;
     use rand::thread_rng;
@@ -171,7 +156,8 @@ mod tests {
     #[test]
     fn new_should_create_kmeans() {
         let distance = SquaredEuclideanDistance::default();
-        let mut kmeans = Kmeans::new(2, distance, thread_rng());
+        let initializer = KmeansPlusPlus(thread_rng());
+        let mut kmeans = Kmeans::new(2, distance, initializer);
 
         let dataset = vec![
             Point2::new(1.0, 2.0),

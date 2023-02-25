@@ -1,4 +1,5 @@
-use crate::math::clustering::kmeans::{Clustering, Kmeans};
+use crate::math::clustering::kmeans::algorithm::{Clustering, Kmeans};
+use crate::math::clustering::kmeans::initializer::CentroidInitializer::{KmeansPlusPlus, Random};
 use crate::math::distance::euclidean::SquaredEuclideanDistance;
 use crate::math::point::Point2;
 use rand::thread_rng;
@@ -18,7 +19,11 @@ pub fn clustering() {
         Point2::new(7.0, 3.0),
     ];
     let distance = SquaredEuclideanDistance::default();
-    let mut kmeans = Kmeans::new(2, distance, thread_rng());
+    let mut kmeans = Kmeans::new(2, distance, Random(thread_rng()));
+    kmeans.fit(&dataset);
+
+    let distance = SquaredEuclideanDistance::default();
+    let mut kmeans = Kmeans::new(2, distance, KmeansPlusPlus(thread_rng()));
     kmeans.fit(&dataset);
 }
 

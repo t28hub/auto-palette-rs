@@ -1,1 +1,1 @@
-pub mod kmeans;
+pub(crate) mod kmeans;
