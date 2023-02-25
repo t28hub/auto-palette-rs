@@ -1,14 +1,11 @@
 use crate::math::clustering::kmeans::algorithm::{Clustering, Kmeans};
-use crate::math::clustering::kmeans::initializer::CentroidInitializer::{KmeansPlusPlus, Random};
+use crate::math::clustering::kmeans::initializer::CentroidInitializer::Random;
 use crate::math::distance::euclidean::SquaredEuclideanDistance;
 use crate::math::point::Point2;
 use rand::thread_rng;
 
+pub mod image;
 mod math;
-
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
 
 pub fn clustering() {
     let dataset = vec![
@@ -21,21 +18,11 @@ pub fn clustering() {
     let distance = SquaredEuclideanDistance::default();
     let mut kmeans = Kmeans::new(2, distance, Random(thread_rng()));
     kmeans.fit(&dataset);
-
-    let distance = SquaredEuclideanDistance::default();
-    let mut kmeans = Kmeans::new(2, distance, KmeansPlusPlus(thread_rng()));
-    kmeans.fit(&dataset);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
 
     #[test]
     fn test_neighbors() {
