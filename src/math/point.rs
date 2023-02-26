@@ -89,24 +89,11 @@ where
     }
 }
 
-impl<F, const N: usize> AddAssign for Point<F, N>
+impl<F, const N: usize> AddAssign<&Point<F, N>> for Point<F, N>
 where
     F: FloatNumber,
 {
-    fn add_assign(&mut self, rhs: Self) {
-        self.components
-            .borrow_mut()
-            .iter_mut()
-            .zip(rhs.components.borrow().iter())
-            .for_each(|(value1, value2)| value1.add_assign(*value2));
-    }
-}
-
-impl<F, const N: usize> AddAssign for &Point<F, N>
-where
-    F: FloatNumber,
-{
-    fn add_assign(&mut self, rhs: Self) {
+    fn add_assign(&mut self, rhs: &Point<F, N>) {
         self.components
             .borrow_mut()
             .iter_mut()

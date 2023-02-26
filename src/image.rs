@@ -1,4 +1,4 @@
-use crate::math::clustering::kmeans::algorithm::{Clustering, Kmeans};
+use crate::math::clustering::kmeans::algorithm::{Clustering, Kmeans, KmeansParams};
 use crate::math::clustering::kmeans::initializer::CentroidInitializer::KmeansPlusPlus;
 use crate::math::distance::euclidean::SquaredEuclideanDistance;
 use crate::math::point::Point3;
@@ -32,9 +32,14 @@ impl<'a> ImageData<'a> {
             index += 4;
         }
 
-        let distance = SquaredEuclideanDistance::default();
-        let initializer = KmeansPlusPlus(thread_rng());
-        let mut clustering = Kmeans::new(6, distance, initializer);
-        clustering.fit(&pixels);
+        let mut params = KmeansParams::new(
+            2,
+            SquaredEuclideanDistance::default(),
+            KmeansPlusPlus(thread_rng()),
+        )
+        .with_max_iterations(100)
+        .with_tolerance(0.001);
+        let kmeans = Kmeans::fit(&pixels, &mut params);
+        println!("Kmeans: {:?}", kmeans.centroids())
     }
 }
