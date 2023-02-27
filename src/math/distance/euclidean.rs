@@ -5,6 +5,7 @@ use std::marker::PhantomData;
 use std::ops::Sub;
 
 /// A distance for computing euclidean distance.
+#[derive(Clone, Debug, PartialEq)]
 pub struct EuclideanDistance<F: FloatNumber> {
     squared: SquaredEuclideanDistance<F>,
 }
@@ -31,6 +32,7 @@ where
 }
 
 /// A distance for computing squared euclidean distance.
+#[derive(Clone, Debug, PartialEq)]
 pub struct SquaredEuclideanDistance<F> {
     _f: PhantomData<F>,
 }

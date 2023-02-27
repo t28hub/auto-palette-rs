@@ -4,7 +4,7 @@ use crate::math::point::Point;
 pub(crate) mod euclidean;
 
 /// A trait for computing the distance between two points.
-pub trait DistanceMeasure<F>: Default
+pub trait DistanceMeasure<F>: Default + PartialEq
 where
     F: FloatNumber,
 {
