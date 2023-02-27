@@ -1,11 +1,14 @@
 use crate::math::distance::DistanceMeasure;
 use crate::math::number::FloatNumber;
 use crate::math::point::Point;
-use rand::{Rng, RngCore};
+use rand::Rng;
 use std::cmp::Ordering;
 
 #[derive(PartialEq, Eq, Clone, Debug)]
-pub(crate) enum Initializer<R: RngCore> {
+pub(crate) enum Initializer<R>
+where
+    R: Rng + Clone,
+{
     #[allow(unused)]
     Random(R),
     #[allow(unused)]
@@ -14,10 +17,10 @@ pub(crate) enum Initializer<R: RngCore> {
 
 impl<R> Initializer<R>
 where
-    R: RngCore,
+    R: Rng + Clone,
 {
     pub(crate) fn initialize<const N: usize, F: FloatNumber, D: DistanceMeasure<F>>(
-        &mut self,
+        &self,
         dataset: &[Point<F, N>],
         k: usize,
         distance: &D,
@@ -31,8 +34,10 @@ where
             return centroids;
         }
         match self {
-            Self::Random(rng) => Self::random(dataset, k, rng),
-            Self::KmeansPlusPlus(rng) => Self::kmeans_plus_plus(dataset, k, rng, distance),
+            Self::Random(rng) => Self::random(dataset, k, &mut rng.clone()),
+            Self::KmeansPlusPlus(rng) => {
+                Self::kmeans_plus_plus(dataset, k, distance, &mut rng.clone())
+            }
         }
     }
 
@@ -61,8 +66,8 @@ where
     fn kmeans_plus_plus<const N: usize, F: FloatNumber, D: DistanceMeasure<F>>(
         dataset: &[Point<F, N>],
         k: usize,
-        rng: &mut R,
         distance: &D,
+        rng: &mut R,
     ) -> Vec<Point<F, N>> {
         let mut selected = vec![false; dataset.len()];
         let mut centroids = Vec::with_capacity(k);
@@ -118,8 +123,9 @@ mod tests {
             Point2::new(5.0, 5.0),
             Point2::new(2.0, 4.0),
         ];
-        let mut initializer = Random(thread_rng());
-        let result = initializer.initialize(&dataset, 2, &EuclideanDistance::default());
+        let distance = EuclideanDistance::default();
+        let initializer = Random(thread_rng());
+        let result = initializer.initialize(&dataset, 2, &distance);
         assert_eq!(result.len(), 2);
     }
 
@@ -132,8 +138,9 @@ mod tests {
             Point2::new(5.0, 5.0),
             Point2::new(2.0, 4.0),
         ];
-        let mut initializer = KmeansPlusPlus(thread_rng());
-        let result = initializer.initialize(&dataset, 2, &SquaredEuclideanDistance::default());
+        let distance = SquaredEuclideanDistance::default();
+        let initializer = KmeansPlusPlus(thread_rng());
+        let result = initializer.initialize(&dataset, 2, &distance);
         assert_eq!(result.len(), 2);
     }
 }

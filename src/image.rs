@@ -1,5 +1,7 @@
-use crate::math::clustering::kmeans::algorithm::{Clustering, Kmeans, KmeansParams};
+use crate::math::clustering::kmeans::algorithm::Kmeans;
 use crate::math::clustering::kmeans::init::Initializer::KmeansPlusPlus;
+use crate::math::clustering::kmeans::params::KmeansParams;
+use crate::math::clustering::traits::Fit;
 use crate::math::distance::euclidean::SquaredEuclideanDistance;
 use crate::math::point::Point3;
 use crate::swatch::Swatch;
@@ -33,14 +35,14 @@ impl<'a> ImageData<'a> {
             index += 4;
         }
 
-        let mut params = KmeansParams::new(
+        let params = KmeansParams::new(
             2,
             SquaredEuclideanDistance::default(),
             KmeansPlusPlus(thread_rng()),
         )
         .with_max_iterations(100)
         .with_tolerance(0.0001);
-        let kmeans = Kmeans::fit(&pixels, &mut params);
+        let kmeans = Kmeans::fit(&pixels, &params);
         kmeans
             .centroids()
             .iter()
