@@ -1,4 +1,4 @@
-use crate::math::distance::DistanceMeasure;
+use crate::math::distance::traits::DistanceMeasure;
 use crate::math::number::FloatNumber;
 use crate::math::point::Point;
 use rand::Rng;
@@ -19,7 +19,7 @@ impl<R> Initializer<R>
 where
     R: Rng + Clone,
 {
-    pub(crate) fn initialize<const N: usize, F: FloatNumber, D: DistanceMeasure<F>>(
+    pub(crate) fn initialize<const N: usize, F: FloatNumber, D: DistanceMeasure>(
         &self,
         dataset: &[Point<F, N>],
         k: usize,
@@ -63,7 +63,7 @@ where
         centroids
     }
 
-    fn kmeans_plus_plus<const N: usize, F: FloatNumber, D: DistanceMeasure<F>>(
+    fn kmeans_plus_plus<const N: usize, F: FloatNumber, D: DistanceMeasure>(
         dataset: &[Point<F, N>],
         k: usize,
         distance: &D,
@@ -123,7 +123,7 @@ mod tests {
             Point2::new(5.0, 5.0),
             Point2::new(2.0, 4.0),
         ];
-        let distance = EuclideanDistance::default();
+        let distance = EuclideanDistance;
         let initializer = Random(thread_rng());
         let result = initializer.initialize(&dataset, 2, &distance);
         assert_eq!(result.len(), 2);
@@ -138,7 +138,7 @@ mod tests {
             Point2::new(5.0, 5.0),
             Point2::new(2.0, 4.0),
         ];
-        let distance = SquaredEuclideanDistance::default();
+        let distance = SquaredEuclideanDistance;
         let initializer = KmeansPlusPlus(thread_rng());
         let result = initializer.initialize(&dataset, 2, &distance);
         assert_eq!(result.len(), 2);

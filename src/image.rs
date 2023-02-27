@@ -35,13 +35,9 @@ impl<'a> ImageData<'a> {
             index += 4;
         }
 
-        let params = KmeansParams::new(
-            2,
-            SquaredEuclideanDistance::default(),
-            KmeansPlusPlus(thread_rng()),
-        )
-        .with_max_iterations(100)
-        .with_tolerance(0.0001);
+        let params = KmeansParams::new(2, SquaredEuclideanDistance, KmeansPlusPlus(thread_rng()))
+            .with_max_iterations(100)
+            .with_tolerance(0.0001);
         let kmeans = Kmeans::fit(&pixels, &params);
         kmeans
             .centroids()

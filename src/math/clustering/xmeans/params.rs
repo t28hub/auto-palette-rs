@@ -1,15 +1,15 @@
 use crate::math::clustering::kmeans::init::Initializer;
-use crate::math::distance::DistanceMeasure;
+use crate::math::distance::traits::DistanceMeasure;
 use crate::math::number::FloatNumber;
 use rand::Rng;
 
 /// A struct representing the parameters of Xmeans.
 #[allow(unused)]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) struct XmeansParams<F, D, R>
 where
     F: FloatNumber,
-    D: DistanceMeasure<F>,
+    D: DistanceMeasure,
     R: Rng + Clone,
 {
     max_k: usize,
@@ -22,7 +22,7 @@ where
 impl<F, D, R> XmeansParams<F, D, R>
 where
     F: FloatNumber,
-    D: DistanceMeasure<F>,
+    D: DistanceMeasure,
     R: Rng + Clone,
 {
     #[allow(unused)]
@@ -83,13 +83,9 @@ mod tests {
 
     #[test]
     fn should_create_params() {
-        let params = XmeansParams::new(
-            25,
-            SquaredEuclideanDistance::default(),
-            KmeansPlusPlus(thread_rng()),
-        )
-        .with_tolerance(0.0125)
-        .with_max_iterations(100);
+        let params = XmeansParams::new(25, SquaredEuclideanDistance, KmeansPlusPlus(thread_rng()))
+            .with_tolerance(0.0125)
+            .with_max_iterations(100);
         assert_eq!(params.max_k(), 25);
         assert_eq!(params.tolerance(), 0.0125);
         assert_eq!(params.max_iterations(), 100);

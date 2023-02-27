@@ -1,58 +1,24 @@
-use crate::math::distance::DistanceMeasure;
+use crate::math::distance::traits::DistanceMeasure;
 use crate::math::number::FloatNumber;
 use crate::math::point::Point;
-use std::marker::PhantomData;
 use std::ops::Sub;
 
 /// A distance for computing euclidean distance.
 #[derive(Clone, Debug, PartialEq)]
-pub struct EuclideanDistance<F: FloatNumber> {
-    squared: SquaredEuclideanDistance<F>,
-}
+pub struct EuclideanDistance;
 
-impl<F> Default for EuclideanDistance<F>
-where
-    F: FloatNumber,
-{
-    fn default() -> Self {
-        Self {
-            squared: SquaredEuclideanDistance::default(),
-        }
-    }
-}
-
-impl<F> DistanceMeasure<F> for EuclideanDistance<F>
-where
-    F: FloatNumber,
-{
-    fn measure<const N: usize>(&self, lhs: &Point<F, N>, rhs: &Point<F, N>) -> F {
-        let squared = self.squared.measure(lhs, rhs);
-        squared.sqrt()
+impl DistanceMeasure for EuclideanDistance {
+    fn measure<F: FloatNumber, const N: usize>(&self, lhs: &Point<F, N>, rhs: &Point<F, N>) -> F {
+        SquaredEuclideanDistance.measure(lhs, rhs).sqrt()
     }
 }
 
 /// A distance for computing squared euclidean distance.
 #[derive(Clone, Debug, PartialEq)]
-pub struct SquaredEuclideanDistance<F> {
-    _f: PhantomData<F>,
-}
+pub struct SquaredEuclideanDistance;
 
-impl<F> Default for SquaredEuclideanDistance<F>
-where
-    F: FloatNumber,
-{
-    fn default() -> Self {
-        Self {
-            _f: PhantomData::default(),
-        }
-    }
-}
-
-impl<F> DistanceMeasure<F> for SquaredEuclideanDistance<F>
-where
-    F: FloatNumber,
-{
-    fn measure<const N: usize>(&self, lhs: &Point<F, N>, rhs: &Point<F, N>) -> F {
+impl DistanceMeasure for SquaredEuclideanDistance {
+    fn measure<F: FloatNumber, const N: usize>(&self, lhs: &Point<F, N>, rhs: &Point<F, N>) -> F {
         return lhs
             .sub(rhs)
             .to_vec()
@@ -68,7 +34,7 @@ mod tests {
 
     #[test]
     fn compute_should_compute_euclidean_distance() {
-        let euclidean = EuclideanDistance::default();
+        let euclidean = EuclideanDistance;
         assert_eq!(
             euclidean.measure(&Point2::new(0.0, 1.0), &Point2::new(1.0, 0.0)),
             2.0_f32.sqrt()
@@ -81,7 +47,7 @@ mod tests {
 
     #[test]
     fn compute_should_compute_squared_euclidean_distance() {
-        let distance = SquaredEuclideanDistance::default();
+        let distance = SquaredEuclideanDistance;
         assert_eq!(
             distance.measure(&Point2::new(0.0, 1.0), &Point2::new(1.0, 0.0)),
             2.0

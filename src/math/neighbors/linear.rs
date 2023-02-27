@@ -1,4 +1,4 @@
-use crate::math::distance::DistanceMeasure;
+use crate::math::distance::traits::DistanceMeasure;
 use crate::math::neighbors::nns::{NearestNeighborSearch, Neighbor};
 use crate::math::number::FloatNumber;
 use crate::math::point::Point;
@@ -7,7 +7,7 @@ use std::cmp::Ordering;
 pub(crate) struct LinearSearch<'a, F, D, const N: usize>
 where
     F: FloatNumber,
-    D: DistanceMeasure<F>,
+    D: DistanceMeasure,
 {
     dataset: &'a Vec<Point<F, N>>,
     distance: &'a D,
@@ -16,7 +16,7 @@ where
 impl<'a, F, D, const N: usize> LinearSearch<'a, F, D, N>
 where
     F: FloatNumber,
-    D: DistanceMeasure<F>,
+    D: DistanceMeasure,
 {
     pub fn new(dataset: &'a Vec<Point<F, N>>, distance: &'a D) -> Self {
         Self { dataset, distance }
@@ -26,7 +26,7 @@ where
 impl<'a, F, D, const N: usize> NearestNeighborSearch<F, &Point<F, N>> for LinearSearch<'a, F, D, N>
 where
     F: FloatNumber,
-    D: DistanceMeasure<F>,
+    D: DistanceMeasure,
 {
     fn search(&self, query: &Point<F, N>, k: usize) -> Vec<Neighbor<F>> {
         if k == 0 {
@@ -66,7 +66,7 @@ mod tests {
     #[test]
     fn search_should_return_neighbors() {
         let dataset = vec![];
-        let distance = SquaredEuclideanDistance::default();
+        let distance = SquaredEuclideanDistance;
         let linear_search = LinearSearch::new(&dataset, &distance);
         assert_eq!(linear_search.search(&Point2::new(3.0, 3.0), 0), vec![]);
 
@@ -112,7 +112,7 @@ mod tests {
     #[test]
     fn search_nearest_should_return_nearest_neighbor() {
         let dataset = vec![];
-        let distance = SquaredEuclideanDistance::default();
+        let distance = SquaredEuclideanDistance;
         let linear_search = LinearSearch::new(&dataset, &distance);
         assert_eq!(linear_search.search_nearest(&Point2::new(0.0, 1.0)), None);
 

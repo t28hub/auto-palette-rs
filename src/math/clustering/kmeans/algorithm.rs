@@ -1,7 +1,7 @@
 use crate::math::clustering::kmeans::cluster::Cluster;
 use crate::math::clustering::kmeans::params::KmeansParams;
 use crate::math::clustering::traits::Fit;
-use crate::math::distance::DistanceMeasure;
+use crate::math::distance::traits::DistanceMeasure;
 use crate::math::neighbors::linear::LinearSearch;
 use crate::math::neighbors::nns::NearestNeighborSearch;
 use crate::math::number::FloatNumber;
@@ -31,7 +31,7 @@ where
         cluster.map_or(0, |c| c.size())
     }
 
-    fn reassign<D: DistanceMeasure<F>>(
+    fn reassign<D: DistanceMeasure>(
         dataset: &[Point<F, N>],
         clusters: &mut [Cluster<F, N>],
         distance: &D,
@@ -77,7 +77,7 @@ where
 impl<F, D, R, const N: usize> Fit<F, N, KmeansParams<F, D, R>> for Kmeans<F, N>
 where
     F: FloatNumber,
-    D: DistanceMeasure<F>,
+    D: DistanceMeasure,
     R: Rng + Clone,
 {
     fn fit(dataset: &[Point<F, N>], params: &KmeansParams<F, D, R>) -> Self {
@@ -139,7 +139,7 @@ mod tests {
             Point2::new(5.0, 5.0),
             Point2::new(2.0, 4.0),
         ];
-        let distance = SquaredEuclideanDistance::default();
+        let distance = SquaredEuclideanDistance;
         let initializer = KmeansPlusPlus(thread_rng());
         let mut params = KmeansParams::new(2, distance, initializer);
         let _kmeans = Kmeans::fit(&dataset, &mut params);
