@@ -280,6 +280,13 @@ mod tests {
     }
 
     #[test]
+    fn add_assign_should_add_assign_other() {
+        let mut point1 = Point2::new(1.0, 2.0);
+        point1.add_assign(&Point2::new(2.0, 3.0));
+        assert_eq!(point1, Point2::new(3.0, 5.0));
+    }
+
+    #[test]
     fn sub_should_sub_other_point() {
         let point1 = Point2::new(1.0, 3.0);
         let point2 = Point2::new(2.0, 2.0);

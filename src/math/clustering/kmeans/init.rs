@@ -5,12 +5,14 @@ use rand::{Rng, RngCore};
 use std::cmp::Ordering;
 
 #[derive(PartialEq, Eq, Clone, Debug)]
-pub(crate) enum CentroidInitializer<R: RngCore> {
+pub(crate) enum Initializer<R: RngCore> {
+    #[allow(unused)]
     Random(R),
+    #[allow(unused)]
     KmeansPlusPlus(R),
 }
 
-impl<R> CentroidInitializer<R>
+impl<R> Initializer<R>
 where
     R: RngCore,
 {
@@ -102,9 +104,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::math::clustering::kmeans::initializer::CentroidInitializer::{
-        KmeansPlusPlus, Random,
-    };
+    use crate::math::clustering::kmeans::init::Initializer::{KmeansPlusPlus, Random};
     use crate::math::distance::euclidean::{EuclideanDistance, SquaredEuclideanDistance};
     use crate::math::point::Point2;
     use rand::thread_rng;
