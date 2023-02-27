@@ -1,30 +1,33 @@
 use crate::math::number::FloatNumber;
 use crate::math::point::Point;
-use num_traits::Zero;
 use std::collections::HashSet;
-use std::ops::{AddAssign, DivAssign};
+use std::marker::PhantomData;
 
 #[derive(Clone, Debug, PartialEq)]
-pub(crate) struct Cluster<F, const N: usize>
+pub(crate) struct Cluster<F, P>
 where
     F: FloatNumber,
+    P: Point<F>,
 {
-    centroid: Point<F, N>,
+    _t: PhantomData<F>,
+    centroid: P,
     children: HashSet<usize>,
 }
 
-impl<F, const N: usize> Cluster<F, N>
+impl<F, P> Cluster<F, P>
 where
     F: FloatNumber,
+    P: Point<F>,
 {
-    pub fn new(initial_centroid: &Point<F, N>) -> Self {
+    pub fn new(initial_centroid: &P) -> Self {
         Self {
-            centroid: initial_centroid.clone(),
+            _t: PhantomData::default(),
+            centroid: *initial_centroid,
             children: HashSet::new(),
         }
     }
 
-    pub fn centroid(&self) -> &Point<F, N> {
+    pub fn centroid(&self) -> &P {
         &self.centroid
     }
 
@@ -45,8 +48,8 @@ where
         }
     }
 
-    pub fn insert(&mut self, index: usize, data: &Point<F, N>) {
-        self.centroid.add_assign(data);
+    pub fn insert(&mut self, index: usize, data: &P) {
+        self.centroid.add_assign(*data);
         self.children.insert(index);
     }
 

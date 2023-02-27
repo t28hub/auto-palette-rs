@@ -7,22 +7,26 @@ use crate::math::neighbors::nns::NearestNeighborSearch;
 use crate::math::number::FloatNumber;
 use crate::math::point::Point;
 use rand::Rng;
+use std::marker::PhantomData;
 
-pub struct Kmeans<F, const N: usize>
+pub struct Kmeans<F, P>
 where
     F: FloatNumber,
+    P: Point<F>,
 {
-    clusters: Vec<Cluster<F, N>>,
+    _t: PhantomData<F>,
+    clusters: Vec<Cluster<F, P>>,
 }
 
-impl<F, const N: usize> Kmeans<F, N>
+impl<F, P> Kmeans<F, P>
 where
     F: FloatNumber,
+    P: Point<F>,
 {
-    pub(crate) fn centroids(&self) -> Vec<Point<F, N>> {
+    pub(crate) fn centroids(&self) -> Vec<P> {
         self.clusters
             .iter()
-            .map(|cluster| -> Point<F, N> { cluster.centroid().clone() })
+            .map(|cluster| -> P { *cluster.centroid() })
             .collect()
     }
 
@@ -32,14 +36,14 @@ where
     }
 
     fn reassign<D: DistanceMeasure>(
-        dataset: &[Point<F, N>],
-        clusters: &mut [Cluster<F, N>],
+        dataset: &[P],
+        clusters: &mut [Cluster<F, P>],
         distance: &D,
         tolerance: F,
     ) -> bool {
         let mut centroids = Vec::with_capacity(clusters.len());
         for cluster in clusters.iter_mut() {
-            centroids.push(cluster.centroid().clone());
+            centroids.push(*cluster.centroid());
             cluster.clear();
         }
 
@@ -74,15 +78,17 @@ where
     }
 }
 
-impl<F, D, R, const N: usize> Fit<F, N, KmeansParams<F, D, R>> for Kmeans<F, N>
+impl<F, P, D, R> Fit<F, P, KmeansParams<F, D, R>> for Kmeans<F, P>
 where
     F: FloatNumber,
+    P: Point<F>,
     D: DistanceMeasure,
     R: Rng + Clone,
 {
-    fn fit(dataset: &[Point<F, N>], params: &KmeansParams<F, D, R>) -> Self {
+    fn fit(dataset: &[P], params: &KmeansParams<F, D, R>) -> Self {
         if params.k() == 0 {
             return Self {
+                _t: PhantomData::default(),
                 clusters: Vec::with_capacity(0),
             };
         }
@@ -97,10 +103,13 @@ where
                     cluster
                 })
                 .collect();
-            return Self { clusters };
+            return Self {
+                _t: PhantomData::default(),
+                clusters,
+            };
         }
 
-        let mut clusters: Vec<Cluster<F, N>> = params
+        let mut clusters: Vec<Cluster<F, P>> = params
             .initializer()
             .initialize(dataset, params.k(), params.distance())
             .iter()
@@ -117,7 +126,10 @@ where
                 break;
             }
         }
-        Kmeans { clusters }
+        Kmeans {
+            _t: PhantomData::default(),
+            clusters,
+        }
     }
 }
 
@@ -133,11 +145,11 @@ mod tests {
     #[test]
     fn new_should_create_kmeans() {
         let dataset = vec![
-            Point2::new(1.0, 2.0),
-            Point2::new(3.0, 1.0),
-            Point2::new(4.0, 5.0),
-            Point2::new(5.0, 5.0),
-            Point2::new(2.0, 4.0),
+            Point2(1.0, 2.0),
+            Point2(3.0, 1.0),
+            Point2(4.0, 5.0),
+            Point2(5.0, 5.0),
+            Point2(2.0, 4.0),
         ];
         let distance = SquaredEuclideanDistance;
         let initializer = KmeansPlusPlus(thread_rng());

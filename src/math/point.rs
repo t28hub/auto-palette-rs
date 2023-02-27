@@ -1,247 +1,150 @@
 use crate::math::number::FloatNumber;
 use num_traits::Zero;
-use std::cell::RefCell;
 use std::fmt::{Debug, Display, Formatter, Result};
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, Sub};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 /// A point in n-dimensional space.
-#[derive(PartialEq, Eq, Clone, Debug)]
-pub struct Point<F: FloatNumber, const N: usize> {
-    components: RefCell<Vec<F>>,
-}
-
-impl<F, const N: usize> Point<F, N>
-where
-    F: FloatNumber,
+pub trait Point<F: FloatNumber>:
+    Clone
+    + Copy
+    + Debug
+    + Zero
+    + Add<Output = Self>
+    + AddAssign
+    + Sub<Output = Self>
+    + SubAssign
+    + Mul<F>
+    + MulAssign<F>
+    + Div<F>
+    + DivAssign<F>
 {
     /// Returns the dimension of this point.
-    pub fn dim(&self) -> usize {
-        N
-    }
+    fn dim(&self) -> usize;
 
     /// Returns the vec representation of this point.
-    pub fn to_vec(&self) -> Vec<F> {
-        self.components.borrow().to_vec()
-    }
+    fn to_vec(&self) -> Vec<F>;
 }
 
-impl<F, const N: usize> Display for Point<F, N>
-where
-    F: FloatNumber,
-{
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "Point{}{:?}", N, self.components.borrow())
-    }
-}
+#[derive(PartialEq, Eq, Copy, Clone, Hash, Debug)]
+pub struct Point2<F: FloatNumber>(pub F, pub F);
 
-impl<F, const N: usize> Zero for Point<F, N>
-where
-    F: FloatNumber,
-{
-    fn zero() -> Self {
-        Self {
-            components: RefCell::new(vec![F::zero(); N]),
+#[derive(PartialEq, Eq, Copy, Clone, Hash, Debug)]
+pub struct Point3<F: FloatNumber>(pub F, pub F, pub F);
+
+macro_rules! impl_point {
+  ($Point:ident { $($label:tt: $field:tt),+ }, $size:expr) => {
+    impl<F> $Point<F> where F: FloatNumber {
+        /// Create a new vector
+        #[inline]
+        #[allow(unused)]
+        pub fn new($($label: F),+) -> Self {
+            Self { $($field: $label),+ }
         }
     }
 
-    fn is_zero(&self) -> bool {
-        self.components.borrow().iter().all(|value| value.is_zero())
-    }
-}
-
-impl<F, const N: usize> Add for Point<F, N>
-where
-    F: FloatNumber,
-{
-    type Output = Self;
-
-    fn add(self, other: Self) -> Self::Output {
-        let components1 = self.components.borrow();
-        let components2 = other.components.borrow();
-        let components = components1
-            .iter()
-            .zip(components2.iter())
-            .map(|(value1, value2)| *value1 + *value2)
-            .collect();
-        Self {
-            components: RefCell::new(components),
+    impl<F> Display for $Point<F> where F: FloatNumber + Display {
+        fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+            write!(f, "{}{:?}", stringify!($Point), ($(self.$field),+))
         }
     }
-}
 
-impl<F, const N: usize> Add for &Point<F, N>
-where
-    F: FloatNumber,
-{
-    type Output = Point<F, N>;
+    impl<F> Point<F> for $Point<F> where F: FloatNumber {
+        #[inline]
+        fn dim(&self) -> usize {
+           $size
+        }
 
-    fn add(self, other: Self) -> Self::Output {
-        let components1 = self.components.borrow();
-        let components2 = other.components.borrow();
-        let components = components1
-            .iter()
-            .zip(components2.iter())
-            .map(|(value1, value2)| *value1 + *value2)
-            .collect();
-        Self::Output {
-            components: RefCell::new(components),
+        #[inline]
+        fn to_vec(&self) -> Vec<F> {
+            vec![$(self.$field),+]
         }
     }
-}
 
-impl<F, const N: usize> AddAssign<&Point<F, N>> for Point<F, N>
-where
-    F: FloatNumber,
-{
-    fn add_assign(&mut self, rhs: &Point<F, N>) {
-        self.components
-            .borrow_mut()
-            .iter_mut()
-            .zip(rhs.components.borrow().iter())
-            .for_each(|(value1, value2)| value1.add_assign(*value2));
-    }
-}
+    impl<F> Zero for $Point<F> where F: FloatNumber {
+        #[inline]
+        fn zero() -> Self {
+            Self { $($field: F::zero()),+ }
+        }
 
-impl<F, const N: usize> Sub for Point<F, N>
-where
-    F: FloatNumber,
-{
-    type Output = Self;
-
-    fn sub(self, other: Self) -> Self::Output {
-        let components1 = self.components.borrow();
-        let components2 = other.components.borrow();
-        let components = components1
-            .iter()
-            .zip(components2.iter())
-            .map(|(value1, value2)| value1.sub(*value2))
-            .collect();
-        Self {
-            components: RefCell::new(components),
+        fn is_zero(&self) -> bool {
+            $(self.$field.is_zero()) &&+
         }
     }
-}
 
-impl<F, const N: usize> Sub for &Point<F, N>
-where
-    F: FloatNumber,
-{
-    type Output = Point<F, N>;
+    impl<F> Add for $Point<F> where F: FloatNumber {
+        type Output = Self;
 
-    fn sub(self, other: Self) -> Self::Output {
-        let components1 = self.components.borrow();
-        let components2 = other.components.borrow();
-        let components = components1
-            .iter()
-            .zip(components2.iter())
-            .map(|(value1, value2)| value1.sub(*value2))
-            .collect();
-        Self::Output {
-            components: RefCell::new(components),
+        #[inline]
+        fn add(self, rhs: Self) -> Self::Output {
+            Self { $($field: self.$field + rhs.$field),+ }
         }
     }
-}
 
-impl<F, const N: usize> Mul<F> for Point<F, N>
-where
-    F: FloatNumber,
-{
-    type Output = Self;
+    impl<F> Sub for $Point<F> where F: FloatNumber {
+        type Output = Self;
 
-    fn mul(self, scalar: F) -> Self::Output {
-        let components1 = self.components.borrow();
-        let components = components1.iter().map(|value| value.mul(scalar)).collect();
-        Self {
-            components: RefCell::new(components),
+        #[inline]
+        fn sub(self, rhs: Self) -> Self::Output {
+            Self { $($field: self.$field - rhs.$field),+ }
         }
     }
-}
 
-impl<F, const N: usize> Mul<F> for &Point<F, N>
-where
-    F: FloatNumber,
-{
-    type Output = Point<F, N>;
+    impl<F> Mul<F> for $Point<F> where F: FloatNumber {
+        type Output = Self;
 
-    fn mul(self, scalar: F) -> Self::Output {
-        let components1 = self.components.borrow();
-        let components = components1.iter().map(|value| value.mul(scalar)).collect();
-        Self::Output {
-            components: RefCell::new(components),
+        #[inline]
+        fn mul(self, rhs: F) -> Self::Output {
+            Self { $($field: self.$field * rhs),+ }
         }
     }
-}
 
-impl<F, const N: usize> Div<F> for Point<F, N>
-where
-    F: FloatNumber,
-{
-    type Output = Self;
+    impl<F> Div<F> for $Point<F> where F: FloatNumber {
+        type Output = Self;
 
-    fn div(self, scalar: F) -> Self::Output {
-        assert!(!scalar.is_zero());
-        let components1 = self.components.borrow();
-        let components = components1.iter().map(|value| value.div(scalar)).collect();
-        Self {
-            components: RefCell::new(components),
+        #[inline]
+        fn div(self, divisor: F) -> Self::Output {
+            if divisor.is_zero() {
+                panic!("{} cannot be divided by zero", stringify!($Point));
+            }
+            Self { $($field: self.$field / divisor),+ }
         }
     }
-}
 
-impl<F, const N: usize> Div<F> for &Point<F, N>
-where
-    F: FloatNumber,
-{
-    type Output = Point<F, N>;
-
-    fn div(self, scalar: F) -> Self::Output {
-        assert!(!scalar.is_zero());
-        let components1 = self.components.borrow();
-        let components = components1.iter().map(|value| value.div(scalar)).collect();
-        Self::Output {
-            components: RefCell::new(components),
+    impl<F> AddAssign<$Point<F>> for $Point<F> where F: FloatNumber {
+        #[inline]
+        fn add_assign(&mut self, rhs: $Point<F>) {
+            $(self.$field += rhs.$field);+
         }
     }
-}
 
-impl<F, const N: usize> DivAssign<F> for Point<F, N>
-where
-    F: FloatNumber,
-{
-    fn div_assign(&mut self, scalar: F) {
-        assert!(!scalar.is_zero());
-        let mut components = self.components.borrow_mut();
-        components.iter_mut().for_each(|value| {
-            *value /= scalar;
-        });
-    }
-}
-
-pub type Point2<F> = Point<F, 2>;
-
-impl<F> Point2<F>
-where
-    F: FloatNumber,
-{
-    pub fn new(x: F, y: F) -> Self {
-        Self {
-            components: RefCell::new(vec![x, y]),
+    impl<F> SubAssign<$Point<F>> for $Point<F> where F: FloatNumber {
+        #[inline]
+        fn sub_assign(&mut self, rhs: $Point<F>) {
+            $(self.$field -= rhs.$field);+
         }
     }
-}
 
-pub type Point3<F> = Point<F, 3>;
-
-impl<F> Point3<F>
-where
-    F: FloatNumber,
-{
-    pub fn new(x: F, y: F, z: F) -> Self {
-        Self {
-            components: RefCell::new(vec![x, y, z]),
+    impl<F> MulAssign<F> for $Point<F> where F: FloatNumber {
+        #[inline]
+        fn mul_assign(&mut self, rhs: F) {
+            $(self.$field *= rhs);+
         }
     }
+
+    impl<F> DivAssign<F> for $Point<F> where F: FloatNumber {
+        #[inline]
+        fn div_assign(&mut self, divisor: F) {
+            if divisor.is_zero() {
+                panic!("{} cannot be divided by zero", stringify!($Point));
+            }
+            $(self.$field /= divisor);+
+        }
+    }
+  }
 }
+
+impl_point!(Point2 { x: 0, y: 1 }, 2);
+impl_point!(Point3 { x: 0, y: 1, z: 2 }, 3);
 
 #[cfg(test)]
 mod tests {
@@ -261,10 +164,10 @@ mod tests {
 
     #[test]
     fn to_string_should_return_string_representation() {
-        assert_eq!(Point2::new(1.0, 2.0).to_string(), "Point2[1.0, 2.0]");
+        assert_eq!(Point2::new(1.0, 2.0).to_string(), "Point2(1.0, 2.0)");
         assert_eq!(
             Point3::new(1.0, 2.0, 3.0).to_string(),
-            "Point3[1.0, 2.0, 3.0]"
+            "Point3(1.0, 2.0, 3.0)"
         );
     }
 
@@ -276,13 +179,14 @@ mod tests {
 
         let point1 = &Point3::new(1.0, 2.0, 3.0);
         let point2 = &Point3::new(2.0, 3.0, 5.0);
-        assert_eq!(point1 + point2, Point3::new(3.0, 5.0, 8.0));
+        assert_eq!(point1.add(*point2), Point3::new(3.0, 5.0, 8.0));
     }
 
     #[test]
     fn add_assign_should_add_assign_other() {
         let mut point1 = Point2::new(1.0, 2.0);
-        point1.add_assign(&Point2::new(2.0, 3.0));
+        let point2 = Point2::new(2.0, 3.0);
+        point1.add_assign(point2);
         assert_eq!(point1, Point2::new(3.0, 5.0));
     }
 
@@ -294,7 +198,7 @@ mod tests {
 
         let point1 = &Point3::new(3.0, 5.0, 7.0);
         let point2 = &Point3::new(1.0, 2.0, 3.0);
-        assert_eq!(point1 - point2, Point3::new(2.0, 3.0, 4.0));
+        assert_eq!(point1.sub(*point2), Point3::new(2.0, 3.0, 4.0));
     }
 
     #[test]
@@ -303,7 +207,7 @@ mod tests {
         assert_eq!(point * 2.0, Point2::new(2.0, 6.0));
 
         let point = &Point3::new(3.0, 5.0, 7.0);
-        assert_eq!(point * 0.5, Point3::new(1.5, 2.5, 3.5));
+        assert_eq!(point.mul(0.5), Point3::new(1.5, 2.5, 3.5));
     }
 
     #[test]
@@ -312,6 +216,6 @@ mod tests {
         assert_eq!(point / 2.0, Point2::new(0.5, 1.5));
 
         let point = &Point3::new(3.0, 5.0, 7.0);
-        assert_eq!(point / 0.5, Point3::new(6.0, 10.0, 14.0));
+        assert_eq!(point.div(0.5), Point3::new(6.0, 10.0, 14.0));
     }
 }

@@ -1,9 +1,10 @@
 use crate::math::number::FloatNumber;
 use crate::math::point::Point;
 
-pub(crate) trait Fit<F, const N: usize, P>
+pub(crate) trait Fit<F, P, T>
 where
     F: FloatNumber,
+    P: Point<F>,
 {
-    fn fit(dataset: &[Point<F, N>], params: &P) -> Self;
+    fn fit(dataset: &[P], params: &T) -> Self;
 }

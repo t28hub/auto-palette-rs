@@ -19,18 +19,18 @@ impl<R> Initializer<R>
 where
     R: Rng + Clone,
 {
-    pub(crate) fn initialize<const N: usize, F: FloatNumber, D: DistanceMeasure>(
+    pub(crate) fn initialize<F: FloatNumber, P: Point<F>, D: DistanceMeasure>(
         &self,
-        dataset: &[Point<F, N>],
+        dataset: &[P],
         k: usize,
         distance: &D,
-    ) -> Vec<Point<F, N>> {
+    ) -> Vec<P> {
         if k == 0 {
             return vec![];
         }
         if k >= dataset.len() {
             let mut centroids = Vec::with_capacity(dataset.len());
-            centroids.extend(dataset.iter().cloned());
+            centroids.extend(dataset.iter());
             return centroids;
         }
         match self {
@@ -41,11 +41,7 @@ where
         }
     }
 
-    fn random<const N: usize, F: FloatNumber>(
-        dataset: &[Point<F, N>],
-        k: usize,
-        rng: &mut R,
-    ) -> Vec<Point<F, N>> {
+    fn random<F: FloatNumber, P: Point<F>>(dataset: &[P], k: usize, rng: &mut R) -> Vec<P> {
         let mut selected = vec![false; dataset.len()];
         let mut centroids = Vec::with_capacity(k);
         while centroids.len() < k {
@@ -57,24 +53,24 @@ where
             let point = dataset.get(index);
             if let Some(centroid) = point {
                 selected.insert(index, true);
-                centroids.push(centroid.clone());
+                centroids.push(*centroid);
             }
         }
         centroids
     }
 
-    fn kmeans_plus_plus<const N: usize, F: FloatNumber, D: DistanceMeasure>(
-        dataset: &[Point<F, N>],
+    fn kmeans_plus_plus<F: FloatNumber, P: Point<F>, D: DistanceMeasure>(
+        dataset: &[P],
         k: usize,
         distance: &D,
         rng: &mut R,
-    ) -> Vec<Point<F, N>> {
+    ) -> Vec<P> {
         let mut selected = vec![false; dataset.len()];
         let mut centroids = Vec::with_capacity(k);
 
         let index = rng.gen_range(0..dataset.len());
         selected.insert(index, true);
-        centroids.push(dataset[index].clone());
+        centroids.push(dataset[index]);
         while centroids.len() < k {
             let furthest = dataset
                 .iter()
@@ -98,7 +94,7 @@ where
 
             if let Some((index, _)) = furthest {
                 selected.insert(index, true);
-                centroids.push(dataset[index].clone());
+                centroids.push(dataset[index]);
             } else {
                 break;
             }
@@ -117,11 +113,11 @@ mod tests {
     #[test]
     fn random_initialize() {
         let dataset = vec![
-            Point2::new(1.0, 2.0),
-            Point2::new(3.0, 1.0),
-            Point2::new(4.0, 5.0),
-            Point2::new(5.0, 5.0),
-            Point2::new(2.0, 4.0),
+            Point2(1.0, 2.0),
+            Point2(3.0, 1.0),
+            Point2(4.0, 5.0),
+            Point2(5.0, 5.0),
+            Point2(2.0, 4.0),
         ];
         let distance = EuclideanDistance;
         let initializer = Random(thread_rng());
@@ -132,11 +128,11 @@ mod tests {
     #[test]
     fn kmeans_plus_plus_initialize() {
         let dataset = vec![
-            Point2::new(1.0, 2.0),
-            Point2::new(3.0, 1.0),
-            Point2::new(4.0, 5.0),
-            Point2::new(5.0, 5.0),
-            Point2::new(2.0, 4.0),
+            Point2(1.0, 2.0),
+            Point2(3.0, 1.0),
+            Point2(4.0, 5.0),
+            Point2(5.0, 5.0),
+            Point2(2.0, 4.0),
         ];
         let distance = SquaredEuclideanDistance;
         let initializer = KmeansPlusPlus(thread_rng());

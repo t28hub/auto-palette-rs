@@ -3,7 +3,7 @@ use crate::math::clustering::kmeans::init::Initializer::KmeansPlusPlus;
 use crate::math::clustering::kmeans::params::KmeansParams;
 use crate::math::clustering::traits::Fit;
 use crate::math::distance::euclidean::SquaredEuclideanDistance;
-use crate::math::point::Point3;
+use crate::math::point::{Point, Point3};
 use crate::swatch::Swatch;
 use rand::thread_rng;
 
@@ -26,7 +26,7 @@ impl<'a> ImageData<'a> {
         let mut index = 0;
         let mut pixels = Vec::with_capacity(self.data.len() / 4);
         while index < self.data.len() {
-            let pixel = Point3::<f64>::new(
+            let pixel = Point3::new(
                 self.data[index].into(),
                 self.data[index + 1].into(),
                 self.data[index + 2].into(),
