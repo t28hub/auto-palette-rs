@@ -1,13 +1,14 @@
 use crate::math::number::FloatNumber;
 use num_traits::Zero;
 use std::fmt::{Debug, Display, Formatter, Result};
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Sub, SubAssign};
 
 /// A point in n-dimensional space.
 pub trait Point<F: FloatNumber>:
     Clone
     + Copy
     + Debug
+    + Index<usize, Output = F>
     + Zero
     + Add<Output = Self>
     + AddAssign
@@ -28,13 +29,46 @@ pub trait Point<F: FloatNumber>:
 #[derive(PartialEq, Eq, Copy, Clone, Hash, Debug)]
 pub struct Point2<F: FloatNumber>(pub F, pub F);
 
+impl<F> Index<usize> for Point2<F>
+where
+    F: FloatNumber,
+{
+    type Output = F;
+
+    #[inline]
+    fn index(&self, index: usize) -> &Self::Output {
+        match index {
+            0 => &self.0,
+            1 => &self.1,
+            _ => panic!("Index out of bounds"),
+        }
+    }
+}
+
 #[derive(PartialEq, Eq, Copy, Clone, Hash, Debug)]
 pub struct Point3<F: FloatNumber>(pub F, pub F, pub F);
+
+impl<F> Index<usize> for Point3<F>
+where
+    F: FloatNumber,
+{
+    type Output = F;
+
+    #[inline]
+    fn index(&self, index: usize) -> &Self::Output {
+        match index {
+            0 => &self.0,
+            1 => &self.1,
+            2 => &self.2,
+            _ => panic!("Index out of bounds"),
+        }
+    }
+}
 
 macro_rules! impl_point {
   ($Point:ident { $($label:tt: $field:tt),+ }, $size:expr) => {
     impl<F> $Point<F> where F: FloatNumber {
-        /// Create a new vector
+        /// Create a new point.
         #[inline]
         #[allow(unused)]
         pub fn new($($label: F),+) -> Self {
