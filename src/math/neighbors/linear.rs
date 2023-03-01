@@ -5,6 +5,8 @@ use crate::math::point::Point;
 use std::cmp::Ordering;
 use std::marker::PhantomData;
 
+/// A nearest neighbor search using linear search.
+#[allow(unused)]
 pub(crate) struct LinearSearch<'a, F, P, D>
 where
     F: FloatNumber,
@@ -22,6 +24,7 @@ where
     P: Point<F>,
     D: DistanceMeasure,
 {
+    #[allow(unused)]
     pub fn new(dataset: &'a Vec<P>, distance: &'a D) -> Self {
         Self {
             _t: PhantomData::default(),
