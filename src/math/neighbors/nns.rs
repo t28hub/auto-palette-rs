@@ -2,7 +2,7 @@ use crate::math::number::FloatNumber;
 use std::fmt::{Display, Formatter, Result};
 
 /// Trait to search for neighbors.
-pub(crate) trait NearestNeighborSearch<F, T>
+pub(crate) trait NeighborSearch<F, T>
 where
     F: FloatNumber,
 {
@@ -11,6 +11,9 @@ where
 
     /// Search nearest neighbor point.
     fn search_nearest(&self, query: T) -> Option<Neighbor<F>>;
+
+    /// Search neighbor points within the given radius.
+    fn search_radius(&self, query: T, radius: F) -> Vec<Neighbor<F>>;
 }
 
 /// A neighbor point.
@@ -49,13 +52,19 @@ mod tests {
 
     #[test]
     fn new_should_create_neighbor() {
-        let neighbor = Neighbor::new(3, 2.0_f32.sqrt());
+        let neighbor = Neighbor::new(3, 2.0);
         assert_eq!(
             neighbor,
             Neighbor {
                 index: 3,
-                distance: 2.0_f32.sqrt()
+                distance: 2.0
             }
         );
+    }
+
+    #[test]
+    fn to_string_should_return_string_representation() {
+        let neighbor = Neighbor::new(5, 7.5);
+        assert_eq!(neighbor.to_string(), "Neighbor(index=5, distance=7.5)");
     }
 }

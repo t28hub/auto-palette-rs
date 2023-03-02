@@ -1,5 +1,5 @@
 use crate::math::distance::traits::DistanceMeasure;
-use crate::math::neighbors::nns::{NearestNeighborSearch, Neighbor};
+use crate::math::neighbors::nns::{Neighbor, NeighborSearch};
 use crate::math::number::FloatNumber;
 use crate::math::point::Point;
 use std::cmp::Ordering;
@@ -34,7 +34,7 @@ where
     }
 }
 
-impl<'a, F, P, D> NearestNeighborSearch<F, &P> for LinearSearch<'a, F, P, D>
+impl<'a, F, P, D> NeighborSearch<F, &P> for LinearSearch<'a, F, P, D>
 where
     F: FloatNumber,
     P: Point<F>,
@@ -42,18 +42,14 @@ where
 {
     fn search(&self, query: &P, k: usize) -> Vec<Neighbor<F>> {
         if k == 0 {
-            return vec![];
+            return Vec::new();
         }
 
-        let mut neighbors: Vec<Neighbor<F>> = self
-            .dataset
-            .iter()
-            .enumerate()
-            .map(|(index, point)| -> Neighbor<F> {
-                let distance = self.distance.measure(point, query);
-                Neighbor::new(index, distance)
-            })
-            .collect();
+        let mut neighbors = Vec::new();
+        for (index, point) in self.dataset.iter().enumerate() {
+            let distance = self.distance.measure(point, query);
+            neighbors.push(Neighbor::new(index, distance))
+        }
 
         neighbors.sort_unstable_by(|neighbor1, neighbor2| -> Ordering {
             neighbor1.distance.partial_cmp(&neighbor2.distance).unwrap()
@@ -67,6 +63,21 @@ where
     fn search_nearest(&self, query: &P) -> Option<Neighbor<F>> {
         self.search(query, 1).pop()
     }
+
+    fn search_radius(&self, query: &P, radius: F) -> Vec<Neighbor<F>> {
+        if radius < F::zero() {
+            return Vec::new();
+        }
+
+        let mut neighbors = Vec::new();
+        for (index, point) in self.dataset.iter().enumerate() {
+            let distance = self.distance.measure(point, query);
+            if distance <= radius {
+                neighbors.push(Neighbor::new(index, distance));
+            }
+        }
+        neighbors
+    }
 }
 
 #[cfg(test)]
@@ -75,21 +86,22 @@ mod tests {
     use crate::math::distance::euclidean::SquaredEuclideanDistance;
     use crate::math::point::Point2;
 
+    const DATASET: [Point2<f32>; 5] = [
+        Point2(1.0, 2.0),
+        Point2(3.0, 1.0),
+        Point2(4.0, 5.0),
+        Point2(5.0, 5.0),
+        Point2(2.0, 4.0),
+    ];
+
     #[test]
-    fn search_should_return_neighbors() {
+    fn search_should_return_knearest_neighbors() {
         let dataset = vec![];
-        let distance = SquaredEuclideanDistance;
-        let linear_search = LinearSearch::new(&dataset, &distance);
+        let linear_search = LinearSearch::new(&dataset, &SquaredEuclideanDistance);
         assert_eq!(linear_search.search(&Point2(3.0, 3.0), 0), vec![]);
 
-        let dataset = vec![
-            Point2(1.0, 2.0),
-            Point2(3.0, 1.0),
-            Point2(4.0, 5.0),
-            Point2(5.0, 5.0),
-            Point2(2.0, 4.0),
-        ];
-        let linear_search = LinearSearch::new(&dataset, &distance);
+        let dataset = Vec::from(DATASET);
+        let linear_search = LinearSearch::new(&dataset, &SquaredEuclideanDistance);
         assert_eq!(linear_search.search(&Point2(3.0, 3.0), 0), vec![]);
         assert_eq!(
             linear_search.search(&Point2(3.0, 3.0), 3),
@@ -124,20 +136,49 @@ mod tests {
     #[test]
     fn search_nearest_should_return_nearest_neighbor() {
         let dataset = vec![];
-        let distance = SquaredEuclideanDistance;
-        let linear_search = LinearSearch::new(&dataset, &distance);
+        let linear_search = LinearSearch::new(&dataset, &SquaredEuclideanDistance);
         assert_eq!(linear_search.search_nearest(&Point2(0.0, 1.0)), None);
 
-        let dataset = vec![
-            Point2(1.0, 2.0),
-            Point2(3.0, 1.0),
-            Point2(5.0, 5.0),
-            Point2(2.0, 4.0),
-        ];
-        let linear_search = LinearSearch::new(&dataset, &distance);
+        let dataset = Vec::from(DATASET);
+        let linear_search = LinearSearch::new(&dataset, &SquaredEuclideanDistance);
         assert_eq!(
-            linear_search.search_nearest(&Point2(2.0, 3.0)),
-            Some(Neighbor::new(3, 1.0))
+            linear_search.search_nearest(&Point2(2.5, 3.0)),
+            Some(Neighbor::new(4, 1.25))
+        );
+    }
+
+    #[test]
+    fn search_radius_should_return_neighbors_within_radius() {
+        let dataset = Vec::from(DATASET);
+        let linear_search = LinearSearch::new(&dataset, &SquaredEuclideanDistance);
+        assert_eq!(linear_search.search_radius(&Point2(2.0, 3.0), -1.0), vec![]);
+        assert_eq!(linear_search.search_radius(&Point2(2.0, 3.0), 0.0), vec![]);
+        assert_eq!(
+            linear_search.search_radius(&Point2(2.0, 3.0), 1.0),
+            vec![Neighbor::new(4, 1.0)]
+        );
+        assert_eq!(
+            linear_search.search_radius(&Point2(2.0, 3.0), 1.5),
+            vec![Neighbor::new(4, 1.0)]
+        );
+        assert_eq!(
+            linear_search.search_radius(&Point2(2.0, 3.0), 10.0),
+            vec![
+                Neighbor::new(0, 2.0),
+                Neighbor::new(1, 5.0),
+                Neighbor::new(2, 8.0),
+                Neighbor::new(4, 1.0),
+            ]
+        );
+        assert_eq!(
+            linear_search.search_radius(&Point2(2.0, 3.0), 15.0),
+            vec![
+                Neighbor::new(0, 2.0),
+                Neighbor::new(1, 5.0),
+                Neighbor::new(2, 8.0),
+                Neighbor::new(3, 13.0),
+                Neighbor::new(4, 1.0),
+            ]
         );
     }
 }

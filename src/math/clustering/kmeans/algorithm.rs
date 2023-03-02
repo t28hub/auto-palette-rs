@@ -2,12 +2,12 @@ use crate::math::clustering::kmeans::cluster::Cluster;
 use crate::math::clustering::kmeans::params::KmeansParams;
 use crate::math::clustering::traits::Fit;
 use crate::math::distance::traits::DistanceMeasure;
-use crate::math::neighbors::nns::NearestNeighborSearch;
+use crate::math::neighbors::kdtree::KDTree;
+use crate::math::neighbors::nns::NeighborSearch;
 use crate::math::number::FloatNumber;
 use crate::math::point::Point;
 use rand::Rng;
 use std::marker::PhantomData;
-use crate::math::neighbors::kdtree::KDTree;
 
 pub struct Kmeans<F, P>
 where
