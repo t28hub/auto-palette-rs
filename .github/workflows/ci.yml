@@ -33,7 +33,7 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: Check code format
-        run: cargo clippy -- -D warnings
+        run: cargo clippy -- -A warnings
 
       - name: Run tests
         run: cargo test

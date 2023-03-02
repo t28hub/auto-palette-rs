@@ -141,7 +141,7 @@ where
     }
 }
 
-impl<F, P, D> NeighborSearch<F, &P> for KDTree<'_, F, P, D>
+impl<F, P, D> NeighborSearch<F, P> for KDTree<'_, F, P, D>
 where
     F: FloatNumber,
     P: Point<F>,

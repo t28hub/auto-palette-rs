@@ -6,5 +6,5 @@ where
     F: FloatNumber,
     P: Point<F>,
 {
-    fn fit(dataset: &[P], params: &T) -> Self;
+    fn fit(dataset: &Vec<P>, params: &T) -> Self;
 }

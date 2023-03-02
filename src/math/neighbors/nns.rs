@@ -7,13 +7,13 @@ where
     F: FloatNumber,
 {
     /// Search k-nearest neighbor points.
-    fn search(&self, query: T, k: usize) -> Vec<Neighbor<F>>;
+    fn search(&self, query: &T, k: usize) -> Vec<Neighbor<F>>;
 
     /// Search nearest neighbor point.
-    fn search_nearest(&self, query: T) -> Option<Neighbor<F>>;
+    fn search_nearest(&self, query: &T) -> Option<Neighbor<F>>;
 
     /// Search neighbor points within the given radius.
-    fn search_radius(&self, query: T, radius: F) -> Vec<Neighbor<F>>;
+    fn search_radius(&self, query: &T, radius: F) -> Vec<Neighbor<F>>;
 }
 
 /// A neighbor point.

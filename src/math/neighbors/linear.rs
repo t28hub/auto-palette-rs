@@ -34,7 +34,7 @@ where
     }
 }
 
-impl<'a, F, P, D> NeighborSearch<F, &P> for LinearSearch<'a, F, P, D>
+impl<'a, F, P, D> NeighborSearch<F, P> for LinearSearch<'a, F, P, D>
 where
     F: FloatNumber,
     P: Point<F>,
