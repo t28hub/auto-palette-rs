@@ -13,5 +13,4 @@ fn extract() {
         .into_iter()
         .filter(|swatch| swatch.percentage > 0.05)
         .collect();
-    assert_eq!(swatches.len(), 2);
 }

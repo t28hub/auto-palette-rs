@@ -70,10 +70,7 @@ where
             let axis = node.axis();
             query[axis] - point[axis]
         };
-        let distance = heap
-            .peek()
-            .map(|e| e.distance())
-            .unwrap_or(F::neg_infinity());
+        let distance = heap.peek().map(|e| e.distance()).unwrap_or(F::min_value());
         if heap.len() < k || delta.abs() <= distance {
             self.search_recursively(node.left(), query, k, heap);
             self.search_recursively(node.right(), query, k, heap);

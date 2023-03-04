@@ -1,4 +1,5 @@
-use num_traits::{Float, Num, ToPrimitive};
+use num_traits::real::Real;
+use num_traits::Num;
 use std::fmt::Debug;
 use std::ops::{AddAssign, DivAssign, MulAssign, RemAssign, SubAssign};
 
@@ -11,18 +12,17 @@ pub trait Clamp {
 
 /// Trait for integer number.
 pub trait Number:
-Copy
-+ Clone
-+ Debug
-+ Num
-+ PartialOrd
-+ AddAssign
-+ SubAssign
-+ MulAssign
-+ DivAssign
-+ RemAssign
-+ Clamp
-+ ToPrimitive
+    Copy
+    + Clone
+    + Debug
+    + Num
+    + PartialOrd
+    + AddAssign
+    + SubAssign
+    + MulAssign
+    + DivAssign
+    + RemAssign
+    + Clamp
 {
     /// Create value of self type from an u8 number.
     #[must_use]
@@ -34,7 +34,7 @@ Copy
 }
 
 /// Trait for float number.
-pub trait FloatNumber: Number + Float {
+pub trait FloatNumber: Number + Real {
     /// Create value of self type from an f32 number.
     #[must_use]
     fn from_f32(n: f32) -> Self;
@@ -45,33 +45,33 @@ pub trait FloatNumber: Number + Float {
 }
 
 macro_rules! impl_number {
-  ($number:ty) => {
-    impl Number for $number {
-        #[inline]
-        fn from_u8(n: u8) -> Self {
-            n as $number
-        }
+    ($number:ty) => {
+        impl Number for $number {
+            #[inline]
+            fn from_u8(n: u8) -> Self {
+                n as $number
+            }
 
-        #[inline]
-        fn from_usize(n: usize) -> Self {
-            n as $number
-        }
-    }
-
-    impl Clamp for $number {
-        #[inline]
-        fn clamp(self, min: Self, max: Self) -> Self {
-            assert!(min <= max);
-            if self < min {
-                min
-            } else if self > max {
-                max
-            } else {
-                self
+            #[inline]
+            fn from_usize(n: usize) -> Self {
+                n as $number
             }
         }
-    }
-  }
+
+        impl Clamp for $number {
+            #[inline]
+            fn clamp(self, min: Self, max: Self) -> Self {
+                assert!(min <= max);
+                if self < min {
+                    min
+                } else if self > max {
+                    max
+                } else {
+                    self
+                }
+            }
+        }
+    };
 }
 
 impl_number!(u8);
@@ -81,45 +81,45 @@ impl_number!(u64);
 impl_number!(u128);
 
 macro_rules! impl_float_number {
-  ($number:ty) => {
-    impl Number for $number {
-        #[inline]
-        fn from_u8(n: u8) -> Self {
-            n as $number
-        }
+    ($number:ty) => {
+        impl Number for $number {
+            #[inline]
+            fn from_u8(n: u8) -> Self {
+                n as $number
+            }
 
-        #[inline]
-        fn from_usize(n: usize) -> Self {
-            n as $number
-        }
-    }
-
-    impl Clamp for $number {
-        #[inline]
-        fn clamp(self, min: Self, max: Self) -> Self {
-            assert!(min <= max);
-            if self < min {
-                min
-            } else if self > max {
-                max
-            } else {
-                self
+            #[inline]
+            fn from_usize(n: usize) -> Self {
+                n as $number
             }
         }
-    }
 
-    impl FloatNumber for $number {
-        #[inline]
-        fn from_f32(n: f32) -> Self {
-            n as $number
+        impl Clamp for $number {
+            #[inline]
+            fn clamp(self, min: Self, max: Self) -> Self {
+                assert!(min <= max);
+                if self < min {
+                    min
+                } else if self > max {
+                    max
+                } else {
+                    self
+                }
+            }
         }
 
-        #[inline]
-        fn from_f64(n: f64) -> Self {
-            n as $number
+        impl FloatNumber for $number {
+            #[inline]
+            fn from_f32(n: f32) -> Self {
+                n as $number
+            }
+
+            #[inline]
+            fn from_f64(n: f64) -> Self {
+                n as $number
+            }
         }
-    }
-  }
+    };
 }
 
 impl_float_number!(f32);
