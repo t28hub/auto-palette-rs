@@ -1,2 +1,2 @@
-mod rgba;
-mod xyz;
+pub mod rgba;
+pub mod xyz;

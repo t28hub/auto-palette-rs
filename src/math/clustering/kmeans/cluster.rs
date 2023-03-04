@@ -43,7 +43,7 @@ where
         if self.is_empty() {
             self.centroid.set_zero();
         } else {
-            let size = F::from_usize(self.children.len()).expect("Cannot convert to FloatNumber");
+            let size = F::from_usize(self.children.len());
             self.centroid.div_assign(size);
         }
     }

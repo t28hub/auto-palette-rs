@@ -162,7 +162,7 @@ where
             let Some(children) = membership.get(cluster_id) else {
                 continue;
             };
-            centroid.div_assign(F::from_usize(children.len()).unwrap_or(F::one()));
+            centroid.div_assign(F::from_usize(children.len()));
         }
 
         DBSCAN {

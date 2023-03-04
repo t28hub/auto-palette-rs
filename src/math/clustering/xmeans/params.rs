@@ -30,7 +30,7 @@ where
         Self {
             max_k,
             max_iterations: 10,
-            tolerance: F::from_f32(0.0001).expect("Cannot convert tolerance"),
+            tolerance: F::from_f32(0.0001),
             distance,
             initializer,
         }
