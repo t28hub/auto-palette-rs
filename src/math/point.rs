@@ -3,7 +3,7 @@ use num_traits::Zero;
 use std::fmt::{Debug, Display, Formatter, Result};
 use std::ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Sub, SubAssign};
 
-/// A point in n-dimensional space.
+/// Point in n-dimensional space.
 pub trait Point<F: FloatNumber>:
     Clone
     + Copy
@@ -19,14 +19,15 @@ pub trait Point<F: FloatNumber>:
     + Div<F>
     + DivAssign<F>
 {
-    /// Returns the dimension of this point.
+    /// Return the dimension of this point.
     fn dim(&self) -> usize;
 
-    /// Returns the vec representation of this point.
+    /// Return the vec representation of this point.
     fn to_vec(&self) -> Vec<F>;
 }
 
-#[derive(PartialEq, Eq, Copy, Clone, Hash, Debug)]
+/// Point in 2-dimensional space.
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub struct Point2<F: FloatNumber>(pub F, pub F);
 
 impl<F> Index<usize> for Point2<F>
@@ -45,6 +46,7 @@ where
     }
 }
 
+/// Point in 3-dimensional space.
 #[derive(PartialEq, Eq, Copy, Clone, Hash, Debug)]
 pub struct Point3<F: FloatNumber>(pub F, pub F, pub F);
 
@@ -60,6 +62,29 @@ where
             0 => &self.0,
             1 => &self.1,
             2 => &self.2,
+            _ => panic!("Index out of bounds"),
+        }
+    }
+}
+
+/// Point in 5-dimensional space.
+#[derive(PartialEq, Eq, Copy, Clone, Hash, Debug)]
+pub struct Point5<F: FloatNumber>(pub F, pub F, pub F, pub F, pub F);
+
+impl<F> Index<usize> for Point5<F>
+where
+    F: FloatNumber,
+{
+    type Output = F;
+
+    #[inline]
+    fn index(&self, index: usize) -> &Self::Output {
+        match index {
+            0 => &self.0,
+            1 => &self.1,
+            2 => &self.2,
+            3 => &self.3,
+            4 => &self.4,
             _ => panic!("Index out of bounds"),
         }
     }
@@ -179,10 +204,39 @@ macro_rules! impl_point {
 
 impl_point!(Point2 { x: 0, y: 1 }, 2);
 impl_point!(Point3 { x: 0, y: 1, z: 2 }, 3);
+impl_point!(
+    Point5 {
+        v: 0,
+        w: 1,
+        x: 2,
+        y: 3,
+        z: 4
+    },
+    5
+);
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn index_should_return_value_corresponding_to_index() {
+        let point2 = Point2::new(1.0, 2.0);
+        assert_eq!(*point2.index(0), 1.0);
+        assert_eq!(*point2.index(1), 2.0);
+
+        let point3 = Point3::new(1.0, 2.0, 3.0);
+        assert_eq!(*point3.index(0), 1.0);
+        assert_eq!(*point3.index(1), 2.0);
+        assert_eq!(*point3.index(2), 3.0);
+
+        let point5 = Point5::new(1.0, 2.0, 3.0, 4.0, 5.0);
+        assert_eq!(*point5.index(0), 1.0);
+        assert_eq!(*point5.index(1), 2.0);
+        assert_eq!(*point5.index(2), 3.0);
+        assert_eq!(*point5.index(3), 4.0);
+        assert_eq!(*point5.index(4), 5.0);
+    }
 
     #[test]
     fn dim_should_return_dimension() {
