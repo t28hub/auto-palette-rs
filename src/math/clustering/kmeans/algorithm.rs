@@ -85,7 +85,7 @@ where
     D: DistanceMeasure,
     R: Rng + Clone,
 {
-    fn fit(dataset: &Vec<P>, params: &KmeansParams<F, D, R>) -> Self {
+    fn fit(dataset: &[P], params: &KmeansParams<F, D, R>) -> Self {
         if params.k() == 0 {
             return Self {
                 _t: PhantomData::default(),

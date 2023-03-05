@@ -102,7 +102,7 @@ where
     D: DistanceMeasure,
 {
     #[must_use]
-    fn fit(dataset: &Vec<P>, params: &Params<F, D>) -> Self {
+    fn fit(dataset: &[P], params: &Params<F, D>) -> Self {
         if dataset.is_empty() {
             return DBSCAN {
                 _t: PhantomData::default(),
@@ -112,7 +112,8 @@ where
             };
         }
 
-        let nns = KDTree::new(dataset, params.distance());
+        let dataset_vec = dataset.to_vec();
+        let nns = KDTree::new(&dataset_vec, params.distance());
         let mut labels = vec![Label::Undefined; dataset.len()];
         let mut cluster_id: usize = 0;
         for (index, point) in dataset.iter().enumerate() {
