@@ -4,7 +4,7 @@ use crate::math::clustering::traits::Fit;
 use crate::math::distance::traits::DistanceMeasure;
 use crate::math::neighbors::kdtree::KDTree;
 use crate::math::neighbors::nns::{Neighbor, NeighborSearch};
-use crate::math::number::FloatNumber;
+use crate::math::number::Float;
 use crate::math::point::Point;
 use std::collections::{HashMap, VecDeque};
 use std::marker::PhantomData;
@@ -13,7 +13,7 @@ use std::marker::PhantomData;
 #[derive(Debug, Clone)]
 pub struct DBSCAN<F, P>
 where
-    F: FloatNumber,
+    F: Float,
     P: Point<F>,
 {
     _t: PhantomData<F>,
@@ -24,7 +24,7 @@ where
 
 impl<F, P> DBSCAN<F, P>
 where
-    F: FloatNumber,
+    F: Float,
     P: Point<F>,
 {
     /// Return a set of centroid.
@@ -97,7 +97,7 @@ where
 
 impl<F, P, D> Fit<F, P, Params<F, D>> for DBSCAN<F, P>
 where
-    F: FloatNumber,
+    F: Float,
     P: Point<F>,
     D: DistanceMeasure,
 {

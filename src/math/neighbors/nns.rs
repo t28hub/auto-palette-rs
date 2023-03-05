@@ -1,10 +1,10 @@
-use crate::math::number::FloatNumber;
+use crate::math::number::Float;
 use std::fmt::{Display, Formatter, Result};
 
 /// Trait to search for neighbors.
 pub(crate) trait NeighborSearch<F, T>
 where
-    F: FloatNumber,
+    F: Float,
 {
     /// Search k-nearest neighbor points.
     fn search(&self, query: &T, k: usize) -> Vec<Neighbor<F>>;
@@ -18,14 +18,14 @@ where
 
 /// A neighbor point.
 #[derive(PartialEq, Eq, Clone, Hash, Debug)]
-pub(crate) struct Neighbor<F: FloatNumber> {
+pub(crate) struct Neighbor<F: Float> {
     pub index: usize,
     pub distance: F,
 }
 
 impl<F> Display for Neighbor<F>
 where
-    F: FloatNumber + Display,
+    F: Float + Display,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(
@@ -38,7 +38,7 @@ where
 
 impl<F> Neighbor<F>
 where
-    F: FloatNumber,
+    F: Float,
 {
     /// Create a new neighbor point.
     pub fn new(index: usize, distance: F) -> Self {

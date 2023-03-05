@@ -34,7 +34,7 @@ pub trait Number:
 }
 
 /// Trait for float number.
-pub trait FloatNumber: Number + Real {
+pub trait Float: Number + Real {
     /// Create value of self type from an f32 number.
     #[must_use]
     fn from_f32(n: f32) -> Self;
@@ -42,6 +42,23 @@ pub trait FloatNumber: Number + Real {
     /// Create value of self type from an f64 number.
     #[must_use]
     fn from_f64(n: f64) -> Self;
+}
+macro_rules! impl_clamp {
+    ($number:ty) => {
+        impl Clamp for $number {
+            #[inline]
+            fn clamp(self, min: Self, max: Self) -> Self {
+                assert!(min <= max);
+                if self < min {
+                    min
+                } else if self > max {
+                    max
+                } else {
+                    self
+                }
+            }
+        }
+    };
 }
 
 macro_rules! impl_number {
@@ -57,58 +74,12 @@ macro_rules! impl_number {
                 n as $number
             }
         }
-
-        impl Clamp for $number {
-            #[inline]
-            fn clamp(self, min: Self, max: Self) -> Self {
-                assert!(min <= max);
-                if self < min {
-                    min
-                } else if self > max {
-                    max
-                } else {
-                    self
-                }
-            }
-        }
     };
 }
 
-impl_number!(u8);
-impl_number!(u16);
-impl_number!(u32);
-impl_number!(u64);
-impl_number!(u128);
-
-macro_rules! impl_float_number {
+macro_rules! impl_float {
     ($number:ty) => {
-        impl Number for $number {
-            #[inline]
-            fn from_u8(n: u8) -> Self {
-                n as $number
-            }
-
-            #[inline]
-            fn from_usize(n: usize) -> Self {
-                n as $number
-            }
-        }
-
-        impl Clamp for $number {
-            #[inline]
-            fn clamp(self, min: Self, max: Self) -> Self {
-                assert!(min <= max);
-                if self < min {
-                    min
-                } else if self > max {
-                    max
-                } else {
-                    self
-                }
-            }
-        }
-
-        impl FloatNumber for $number {
+        impl Float for $number {
             #[inline]
             fn from_f32(n: f32) -> Self {
                 n as $number
@@ -122,5 +93,21 @@ macro_rules! impl_float_number {
     };
 }
 
-impl_float_number!(f32);
-impl_float_number!(f64);
+impl_clamp!(u8);
+impl_clamp!(u16);
+impl_clamp!(u32);
+impl_clamp!(u64);
+impl_clamp!(u128);
+impl_clamp!(f32);
+impl_clamp!(f64);
+
+impl_number!(u8);
+impl_number!(u16);
+impl_number!(u32);
+impl_number!(u64);
+impl_number!(u128);
+impl_number!(f32);
+impl_number!(f64);
+
+impl_float!(f32);
+impl_float!(f64);

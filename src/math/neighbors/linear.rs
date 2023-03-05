@@ -1,6 +1,6 @@
 use crate::math::distance::traits::DistanceMeasure;
 use crate::math::neighbors::nns::{Neighbor, NeighborSearch};
-use crate::math::number::FloatNumber;
+use crate::math::number::Float;
 use crate::math::point::Point;
 use std::cmp::Ordering;
 use std::marker::PhantomData;
@@ -9,7 +9,7 @@ use std::marker::PhantomData;
 #[allow(unused)]
 pub(crate) struct LinearSearch<'a, F, P, D>
 where
-    F: FloatNumber,
+    F: Float,
     P: Point<F>,
     D: DistanceMeasure,
 {
@@ -20,7 +20,7 @@ where
 
 impl<'a, F, P, D> LinearSearch<'a, F, P, D>
 where
-    F: FloatNumber,
+    F: Float,
     P: Point<F>,
     D: DistanceMeasure,
 {
@@ -36,7 +36,7 @@ where
 
 impl<'a, F, P, D> NeighborSearch<F, P> for LinearSearch<'a, F, P, D>
 where
-    F: FloatNumber,
+    F: Float,
     P: Point<F>,
     D: DistanceMeasure,
 {

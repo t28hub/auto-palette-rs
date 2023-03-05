@@ -1,4 +1,4 @@
-use crate::math::number::FloatNumber;
+use crate::math::number::Float;
 use crate::math::point::Point;
 use std::collections::HashSet;
 use std::marker::PhantomData;
@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct Cluster<F, P>
 where
-    F: FloatNumber,
+    F: Float,
     P: Point<F>,
 {
     _t: PhantomData<F>,
@@ -16,7 +16,7 @@ where
 
 impl<F, P> Cluster<F, P>
 where
-    F: FloatNumber,
+    F: Float,
     P: Point<F>,
 {
     pub fn new(initial_centroid: &P) -> Self {

@@ -1,11 +1,11 @@
 use crate::math::distance::traits::DistanceMeasure;
-use crate::math::number::FloatNumber;
+use crate::math::number::Float;
 
 /// Parameters of DBSCAN clustering algorithm.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Params<F, D>
 where
-    F: FloatNumber,
+    F: Float,
     D: DistanceMeasure,
 {
     min_points: usize,
@@ -15,7 +15,7 @@ where
 
 impl<F, D> Params<F, D>
 where
-    F: FloatNumber,
+    F: Float,
     D: DistanceMeasure,
 {
     /// Create a new Params with required parameters.

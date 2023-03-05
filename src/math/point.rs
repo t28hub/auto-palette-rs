@@ -1,10 +1,10 @@
-use crate::math::number::FloatNumber;
+use crate::math::number::Float;
 use num_traits::Zero;
 use std::fmt::{Debug, Display, Formatter, Result};
 use std::ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Sub, SubAssign};
 
 /// Point in n-dimensional space.
-pub trait Point<F: FloatNumber>:
+pub trait Point<F: Float>:
     Clone
     + Copy
     + Debug
@@ -28,11 +28,11 @@ pub trait Point<F: FloatNumber>:
 
 /// Point in 2-dimensional space.
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
-pub struct Point2<F: FloatNumber>(pub F, pub F);
+pub struct Point2<F: Float>(pub F, pub F);
 
 impl<F> Index<usize> for Point2<F>
 where
-    F: FloatNumber,
+    F: Float,
 {
     type Output = F;
 
@@ -48,11 +48,11 @@ where
 
 /// Point in 3-dimensional space.
 #[derive(PartialEq, Eq, Copy, Clone, Hash, Debug)]
-pub struct Point3<F: FloatNumber>(pub F, pub F, pub F);
+pub struct Point3<F: Float>(pub F, pub F, pub F);
 
 impl<F> Index<usize> for Point3<F>
 where
-    F: FloatNumber,
+    F: Float,
 {
     type Output = F;
 
@@ -69,11 +69,11 @@ where
 
 /// Point in 5-dimensional space.
 #[derive(PartialEq, Eq, Copy, Clone, Hash, Debug)]
-pub struct Point5<F: FloatNumber>(pub F, pub F, pub F, pub F, pub F);
+pub struct Point5<F: Float>(pub F, pub F, pub F, pub F, pub F);
 
 impl<F> Index<usize> for Point5<F>
 where
-    F: FloatNumber,
+    F: Float,
 {
     type Output = F;
 
@@ -92,7 +92,7 @@ where
 
 macro_rules! impl_point {
   ($Point:ident { $($label:tt: $field:tt),+ }, $size:expr) => {
-    impl<F> $Point<F> where F: FloatNumber {
+    impl<F> $Point<F> where F: Float {
         /// Create a new point.
         #[inline]
         #[allow(unused)]
@@ -101,13 +101,13 @@ macro_rules! impl_point {
         }
     }
 
-    impl<F> Display for $Point<F> where F: FloatNumber + Display {
+    impl<F> Display for $Point<F> where F: Float + Display {
         fn fmt(&self, f: &mut Formatter<'_>) -> Result {
             write!(f, "{}{:?}", stringify!($Point), ($(self.$field),+))
         }
     }
 
-    impl<F> Point<F> for $Point<F> where F: FloatNumber {
+    impl<F> Point<F> for $Point<F> where F: Float {
         #[inline]
         fn dim(&self) -> usize {
            $size
@@ -119,7 +119,7 @@ macro_rules! impl_point {
         }
     }
 
-    impl<F> Zero for $Point<F> where F: FloatNumber {
+    impl<F> Zero for $Point<F> where F: Float {
         #[inline]
         fn zero() -> Self {
             Self { $($field: F::zero()),+ }
@@ -130,7 +130,7 @@ macro_rules! impl_point {
         }
     }
 
-    impl<F> Add for $Point<F> where F: FloatNumber {
+    impl<F> Add for $Point<F> where F: Float {
         type Output = Self;
 
         #[inline]
@@ -139,7 +139,7 @@ macro_rules! impl_point {
         }
     }
 
-    impl<F> Sub for $Point<F> where F: FloatNumber {
+    impl<F> Sub for $Point<F> where F: Float {
         type Output = Self;
 
         #[inline]
@@ -148,7 +148,7 @@ macro_rules! impl_point {
         }
     }
 
-    impl<F> Mul<F> for $Point<F> where F: FloatNumber {
+    impl<F> Mul<F> for $Point<F> where F: Float {
         type Output = Self;
 
         #[inline]
@@ -157,7 +157,7 @@ macro_rules! impl_point {
         }
     }
 
-    impl<F> Div<F> for $Point<F> where F: FloatNumber {
+    impl<F> Div<F> for $Point<F> where F: Float {
         type Output = Self;
 
         #[inline]
@@ -169,28 +169,28 @@ macro_rules! impl_point {
         }
     }
 
-    impl<F> AddAssign<$Point<F>> for $Point<F> where F: FloatNumber {
+    impl<F> AddAssign<$Point<F>> for $Point<F> where F: Float {
         #[inline]
         fn add_assign(&mut self, rhs: $Point<F>) {
             $(self.$field += rhs.$field);+
         }
     }
 
-    impl<F> SubAssign<$Point<F>> for $Point<F> where F: FloatNumber {
+    impl<F> SubAssign<$Point<F>> for $Point<F> where F: Float {
         #[inline]
         fn sub_assign(&mut self, rhs: $Point<F>) {
             $(self.$field -= rhs.$field);+
         }
     }
 
-    impl<F> MulAssign<F> for $Point<F> where F: FloatNumber {
+    impl<F> MulAssign<F> for $Point<F> where F: Float {
         #[inline]
         fn mul_assign(&mut self, rhs: F) {
             $(self.$field *= rhs);+
         }
     }
 
-    impl<F> DivAssign<F> for $Point<F> where F: FloatNumber {
+    impl<F> DivAssign<F> for $Point<F> where F: Float {
         #[inline]
         fn div_assign(&mut self, divisor: F) {
             if divisor.is_zero() {

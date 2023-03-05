@@ -1,5 +1,5 @@
 use crate::math::distance::traits::DistanceMeasure;
-use crate::math::number::FloatNumber;
+use crate::math::number::Float;
 use crate::math::point::Point;
 use rand::Rng;
 use std::cmp::Ordering;
@@ -19,7 +19,7 @@ impl<R> Initializer<R>
 where
     R: Rng + Clone,
 {
-    pub(crate) fn initialize<F: FloatNumber, P: Point<F>, D: DistanceMeasure>(
+    pub(crate) fn initialize<F: Float, P: Point<F>, D: DistanceMeasure>(
         &self,
         dataset: &[P],
         k: usize,
@@ -41,7 +41,7 @@ where
         }
     }
 
-    fn random<F: FloatNumber, P: Point<F>>(dataset: &[P], k: usize, rng: &mut R) -> Vec<P> {
+    fn random<F: Float, P: Point<F>>(dataset: &[P], k: usize, rng: &mut R) -> Vec<P> {
         let mut selected = vec![false; dataset.len()];
         let mut centroids = Vec::with_capacity(k);
         while centroids.len() < k {
@@ -59,7 +59,7 @@ where
         centroids
     }
 
-    fn kmeans_plus_plus<F: FloatNumber, P: Point<F>, D: DistanceMeasure>(
+    fn kmeans_plus_plus<F: Float, P: Point<F>, D: DistanceMeasure>(
         dataset: &[P],
         k: usize,
         distance: &D,

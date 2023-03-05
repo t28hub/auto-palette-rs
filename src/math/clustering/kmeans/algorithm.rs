@@ -4,14 +4,14 @@ use crate::math::clustering::traits::Fit;
 use crate::math::distance::traits::DistanceMeasure;
 use crate::math::neighbors::kdtree::KDTree;
 use crate::math::neighbors::nns::NeighborSearch;
-use crate::math::number::FloatNumber;
+use crate::math::number::Float;
 use crate::math::point::Point;
 use rand::Rng;
 use std::marker::PhantomData;
 
 pub struct Kmeans<F, P>
 where
-    F: FloatNumber,
+    F: Float,
     P: Point<F>,
 {
     _t: PhantomData<F>,
@@ -20,7 +20,7 @@ where
 
 impl<F, P> Kmeans<F, P>
 where
-    F: FloatNumber,
+    F: Float,
     P: Point<F>,
 {
     pub(crate) fn centroids(&self) -> Vec<P> {
@@ -80,7 +80,7 @@ where
 
 impl<F, P, D, R> Fit<F, P, KmeansParams<F, D, R>> for Kmeans<F, P>
 where
-    F: FloatNumber,
+    F: Float,
     P: Point<F>,
     D: DistanceMeasure,
     R: Rng + Clone,

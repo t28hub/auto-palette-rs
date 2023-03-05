@@ -1,10 +1,10 @@
 use crate::color::rgba::Rgba;
-use crate::math::number::FloatNumber;
+use crate::math::number::Float;
 use std::fmt::{Display, Formatter, Result};
 
-/// Color in standard CIE XYZ color space.
-#[derive(Debug, Clone, PartialEq, Copy)]
-pub struct XYZ<F: FloatNumber> {
+/// Color in CIE XYZ color space.
+#[derive(Debug, Clone, PartialEq)]
+pub struct XYZ<F: Float> {
     pub x: F,
     pub y: F,
     pub z: F,
@@ -12,7 +12,7 @@ pub struct XYZ<F: FloatNumber> {
 
 impl<F> XYZ<F>
 where
-    F: FloatNumber,
+    F: Float,
 {
     #[inline]
     #[must_use]
@@ -41,7 +41,7 @@ where
 
 impl<F> Display for XYZ<F>
 where
-    F: FloatNumber + Display,
+    F: Float + Display,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "XYZ({x}, {y}, {z})", x = self.x, y = self.y, z = self.z,)
@@ -50,7 +50,7 @@ where
 
 impl<F> From<&Rgba> for XYZ<F>
 where
-    F: FloatNumber,
+    F: Float,
 {
     #[inline]
     fn from(rgba: &Rgba) -> Self {

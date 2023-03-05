@@ -1,9 +1,9 @@
 use crate::color::xyz::XYZ;
-use crate::math::number::{FloatNumber, Number};
+use crate::math::number::{Float, Number};
 use std::fmt::{Display, Formatter, Result};
 
 /// Color in standard RGB color space.
-#[derive(Debug, Clone, Eq, PartialEq, Copy)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Rgba {
     pub r: u8,
     pub g: u8,
@@ -123,7 +123,7 @@ impl Rgba {
     }
 
     #[must_use]
-    fn normalize_value<F: FloatNumber>(value: F) -> u8 {
+    fn normalize_value<F: Float>(value: F) -> u8 {
         value.to_u8().expect("The value could not be cast to u8")
     }
 }
@@ -143,7 +143,7 @@ impl Display for Rgba {
 
 impl<F> From<&XYZ<F>> for Rgba
 where
-    F: FloatNumber,
+    F: Float,
 {
     #[inline]
     fn from(xyz: &XYZ<F>) -> Self {

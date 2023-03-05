@@ -1,6 +1,6 @@
 use crate::math::distance::traits::DistanceMeasure;
 use crate::math::neighbors::nns::{Neighbor, NeighborSearch};
-use crate::math::number::FloatNumber;
+use crate::math::number::Float;
 use crate::math::point::Point;
 use element::Element;
 use node::Node;
@@ -16,7 +16,7 @@ mod node;
 #[derive(Debug)]
 pub(crate) struct KDTree<'a, F, P, D>
 where
-    F: FloatNumber,
+    F: Float,
     P: Point<F>,
     D: DistanceMeasure,
 {
@@ -28,7 +28,7 @@ where
 
 impl<'a, F, P, D> KDTree<'a, F, P, D>
 where
-    F: FloatNumber,
+    F: Float,
     P: Point<F>,
     D: DistanceMeasure + 'a,
 {
@@ -140,7 +140,7 @@ where
 
 impl<F, P, D> NeighborSearch<F, P> for KDTree<'_, F, P, D>
 where
-    F: FloatNumber,
+    F: Float,
     P: Point<F>,
     D: DistanceMeasure,
 {

@@ -1,13 +1,13 @@
 use crate::math::clustering::kmeans::init::Initializer;
 use crate::math::distance::traits::DistanceMeasure;
-use crate::math::number::FloatNumber;
+use crate::math::number::Float;
 use rand::Rng;
 
 /// A struct representing the parameters of Kmeans.
 #[derive(Clone, Debug, PartialEq)]
 pub(crate) struct KmeansParams<F, D, R>
 where
-    F: FloatNumber,
+    F: Float,
     D: DistanceMeasure,
     R: Rng + Clone,
 {
@@ -20,7 +20,7 @@ where
 
 impl<F, D, R> KmeansParams<F, D, R>
 where
-    F: FloatNumber,
+    F: Float,
     D: DistanceMeasure,
     R: Rng + Clone,
 {

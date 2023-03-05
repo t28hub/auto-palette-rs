@@ -1,16 +1,16 @@
-use crate::math::number::FloatNumber;
+use crate::math::number::Float;
 use std::cmp::Ordering;
 use std::cmp::Ordering::Greater;
 
 /// An index of the node and the distance from a query point.
-pub(crate) struct Element<F: FloatNumber> {
+pub(crate) struct Element<F: Float> {
     index: usize,
     distance: F,
 }
 
 impl<F> Element<F>
 where
-    F: FloatNumber,
+    F: Float,
 {
     /// Create a new element.
     pub(crate) fn new(index: usize, distance: F) -> Self {
@@ -28,11 +28,11 @@ where
     }
 }
 
-impl<F> Eq for Element<F> where F: FloatNumber {}
+impl<F> Eq for Element<F> where F: Float {}
 
 impl<F> PartialEq for Element<F>
 where
-    F: FloatNumber,
+    F: Float,
 {
     fn eq(&self, other: &Self) -> bool {
         self.distance == other.distance
@@ -41,7 +41,7 @@ where
 
 impl<F> Ord for Element<F>
 where
-    F: FloatNumber,
+    F: Float,
 {
     fn cmp(&self, other: &Self) -> Ordering {
         self.partial_cmp(other).unwrap_or(Greater)
@@ -50,7 +50,7 @@ where
 
 impl<F> PartialOrd for Element<F>
 where
-    F: FloatNumber,
+    F: Float,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         // Return reversed ordering to increase the priority in the BinaryHeap.

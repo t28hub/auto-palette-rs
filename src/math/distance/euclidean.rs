@@ -1,5 +1,5 @@
 use crate::math::distance::traits::DistanceMeasure;
-use crate::math::number::FloatNumber;
+use crate::math::number::Float;
 use crate::math::point::Point;
 
 /// A distance for computing euclidean distance.
@@ -7,7 +7,7 @@ use crate::math::point::Point;
 pub struct EuclideanDistance;
 
 impl DistanceMeasure for EuclideanDistance {
-    fn measure<F: FloatNumber, P: Point<F>>(&self, lhs: &P, rhs: &P) -> F {
+    fn measure<F: Float, P: Point<F>>(&self, lhs: &P, rhs: &P) -> F {
         SquaredEuclideanDistance.measure(lhs, rhs).sqrt()
     }
 }
@@ -17,7 +17,7 @@ impl DistanceMeasure for EuclideanDistance {
 pub struct SquaredEuclideanDistance;
 
 impl DistanceMeasure for SquaredEuclideanDistance {
-    fn measure<F: FloatNumber, P: Point<F>>(&self, lhs: &P, rhs: &P) -> F {
+    fn measure<F: Float, P: Point<F>>(&self, lhs: &P, rhs: &P) -> F {
         return lhs
             .sub(*rhs)
             .to_vec()
