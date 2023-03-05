@@ -132,34 +132,19 @@ mod tests {
     #[test]
     fn new_should_create_lab_color() {
         let lab = Lab::new(53.23, 80.11, 67.22);
-        assert_eq!(
-            lab,
-            Lab {
-                l: 53.23,
-                a: 80.11,
-                b: 67.22,
-            }
-        );
+        assert_eq!(lab.l, 53.23);
+        assert_eq!(lab.a, 80.11);
+        assert_eq!(lab.b, 67.22);
 
         let lab = Lab::new(-4.0, -192.0, -192.0);
-        assert_eq!(
-            lab,
-            Lab {
-                l: 0.0,
-                a: -128.0,
-                b: -128.0,
-            }
-        );
+        assert_eq!(lab.l, 0.0);
+        assert_eq!(lab.a, -128.0);
+        assert_eq!(lab.b, -128.0);
 
         let lab = Lab::new(108.0, 128.0, 128.0);
-        assert_eq!(
-            lab,
-            Lab {
-                l: 100.0,
-                a: 127.0,
-                b: 127.0,
-            }
-        );
+        assert_eq!(lab.l, 100.0);
+        assert_eq!(lab.a, 127.0);
+        assert_eq!(lab.b, 127.0);
     }
 
     #[test]
@@ -169,32 +154,32 @@ mod tests {
     }
 
     #[test]
-    fn from_xyz_should_create_lab_color() {
+    fn from_xyz_should_convert_to_lab() {
         let black = XYZ::from(&Rgba::black());
         assert_eq!(Lab::from(&black), Lab::new(0.0, 0.0, 0.0));
 
         let white = XYZ::from(&Rgba::white());
         assert_eq!(
             Lab::from(&white),
-            Lab::new(100.0, -0.0006973446715075049, 0.025466932475515236)
+            Lab::new(100.0, -0.0007014157375473395, 0.0254686291692785)
         );
 
         let red = XYZ::from(&Rgba::red());
         assert_eq!(
             Lab::from(&red),
-            Lab::new(53.23711812964011, 80.08964041954192, 67.20313797755821)
-        );
-
-        let blue = XYZ::from(&Rgba::blue());
-        assert_eq!(
-            Lab::from(&blue),
-            Lab::new(32.300804117317334, 79.19528089035899, -107.85545119181204)
+            Lab::new(53.23711495815769, 80.08963699438709, 67.2031352432351)
         );
 
         let green = XYZ::from(&Rgba::green());
         assert_eq!(
             Lab::from(&green),
-            Lab::new(87.73553935045295, -86.18229976985276, 83.18665851299563)
+            Lab::new(87.73553464128194, -86.18229362351477, 83.1866539998871)
+        );
+
+        let blue = XYZ::from(&Rgba::blue());
+        assert_eq!(
+            Lab::from(&blue),
+            Lab::new(32.30080257229819, 79.1952752634909, -107.85544501392465)
         );
     }
 }
