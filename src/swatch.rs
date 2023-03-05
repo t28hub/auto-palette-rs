@@ -1,8 +1,9 @@
+use crate::math::number::Float;
 use std::cmp::Ordering;
 
 /// Color swatch.
 #[derive(Clone, Debug, PartialEq)]
-pub struct Swatch {
+pub struct Swatch<F: Float> {
     /// The representative color.
     pub color: (u8, u8, u8),
 
@@ -10,19 +11,27 @@ pub struct Swatch {
     pub position: (u32, u32),
 
     /// The percentage of this swatch.
-    pub percentage: f64,
+    pub percentage: F,
 }
 
-impl Eq for Swatch {}
+impl<F> Eq for Swatch<F> where F: Float {}
 
-impl PartialOrd for Swatch {
+impl<F> PartialOrd for Swatch<F>
+where
+    F: Float,
+{
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.percentage.partial_cmp(&other.percentage)
     }
 }
 
-impl Ord for Swatch {
+impl<F> Ord for Swatch<F>
+where
+    F: Float,
+{
     fn cmp(&self, other: &Self) -> Ordering {
-        self.percentage.total_cmp(&other.percentage)
+        self.percentage
+            .partial_cmp(&other.percentage)
+            .unwrap_or(Ordering::Equal)
     }
 }

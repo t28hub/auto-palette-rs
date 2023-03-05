@@ -28,6 +28,14 @@ pub trait Number:
     #[must_use]
     fn from_u8(n: u8) -> Self;
 
+    /// Create value of self type from an u32 number.
+    #[must_use]
+    fn from_u32(n: u32) -> Self;
+
+    /// Create value of self type from an u64 number.
+    #[must_use]
+    fn from_u64(n: u64) -> Self;
+
     /// Create value of self type from an usize number.
     #[must_use]
     fn from_usize(n: usize) -> Self;
@@ -43,6 +51,7 @@ pub trait Float: Number + Real {
     #[must_use]
     fn from_f64(n: f64) -> Self;
 }
+
 macro_rules! impl_clamp {
     ($number:ty) => {
         impl Clamp for $number {
@@ -66,6 +75,16 @@ macro_rules! impl_number {
         impl Number for $number {
             #[inline]
             fn from_u8(n: u8) -> Self {
+                n as $number
+            }
+
+            #[inline]
+            fn from_u32(n: u32) -> Self {
+                n as $number
+            }
+
+            #[inline]
+            fn from_u64(n: u64) -> Self {
                 n as $number
             }
 
