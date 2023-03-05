@@ -1,2 +1,3 @@
 pub(crate) mod algorithm;
-mod params;
+pub(crate) mod params;
+mod core_distance;

@@ -23,6 +23,14 @@ impl Params {
             metric,
         }
     }
+
+    pub fn min_samples(&self) -> usize {
+        self.min_samples
+    }
+
+    pub fn metric(&self) -> &DistanceMetric {
+        &self.metric
+    }
 }
 
 #[cfg(test)]
