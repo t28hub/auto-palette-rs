@@ -38,6 +38,6 @@ jobs:
       - name: Run tests
         run: cargo test
 
-      - name: Build auto-palette-rs
+      - name: Build library
         run: cargo build --lib --release
 

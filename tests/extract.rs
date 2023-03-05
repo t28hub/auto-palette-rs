@@ -1,7 +1,7 @@
 extern crate image;
 
-use auto_palette_rs::image::ImageData;
-use auto_palette_rs::swatch::Swatch;
+use auto_palette::image::ImageData;
+use auto_palette::swatch::Swatch;
 
 #[test]
 fn extract() {

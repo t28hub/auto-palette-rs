@@ -1,4 +1,4 @@
-auto-palette-rs
+auto-palette
 =====
 [![GitHub Actions](https://github.com/t28hub/auto-palette-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/t28hub/auto-palette-rs/actions/workflows/ci.yml)
 
