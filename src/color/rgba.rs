@@ -148,21 +148,21 @@ where
     #[inline]
     fn from(xyz: &XYZ<F>) -> Self {
         let f = |value: F| -> F {
-            if value <= F::from_f32(0.0031308) {
-                F::from_f32(12.92) * value
+            if value <= F::from_f64(0.0031308) {
+                F::from_f64(12.92) * value
             } else {
-                F::from_f32(1.055) * value.powf(F::from_f32(1.0 / 2.4)) - F::from_f32(0.055)
+                F::from_f64(1.055) * value.powf(F::from_f64(1.0 / 2.4)) - F::from_f64(0.055)
             }
         };
 
-        let fr = f(F::from_f32(3.24097) * xyz.x
-            - F::from_f32(1.537383) * xyz.y
-            - F::from_f32(0.498611) * xyz.z);
-        let fg = f(F::from_f32(-0.969244) * xyz.x
-            + F::from_f32(1.875968) * xyz.y
-            + F::from_f32(0.041555) * xyz.z);
-        let fb = f(F::from_f32(0.05563) * xyz.x - F::from_f32(0.203977) * xyz.y
-            + F::from_f32(1.056972) * xyz.z);
+        let fr = f(F::from_f64(3.24097) * xyz.x
+            - F::from_f64(1.537383) * xyz.y
+            - F::from_f64(0.498611) * xyz.z);
+        let fg = f(F::from_f64(-0.969244) * xyz.x
+            + F::from_f64(1.875968) * xyz.y
+            + F::from_f64(0.041555) * xyz.z);
+        let fb = f(F::from_f64(0.05563) * xyz.x - F::from_f64(0.203977) * xyz.y
+            + F::from_f64(1.056972) * xyz.z);
 
         let max_value = Rgba::max_value::<F>();
         let r = Self::normalize_value((fr * max_value).round());

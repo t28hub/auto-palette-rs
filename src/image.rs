@@ -1,5 +1,6 @@
 use crate::color::lab::Lab;
 use crate::color::rgba::Rgba;
+use crate::color::white_point::D65;
 use crate::color::xyz::XYZ;
 use crate::math::clustering::dbscan::algorithm::DBSCAN;
 use crate::math::clustering::dbscan::params::Params;
@@ -45,8 +46,8 @@ impl<'a> ImageData<'a> {
                 self.data[index + 2],
                 self.data[index + 3],
             );
-            let xyz: XYZ<F> = XYZ::from(&rgba);
-            let Lab { l, a, b } = Lab::from(&xyz);
+            let xyz: XYZ<F, D65> = XYZ::from(&rgba);
+            let Lab { l, a, b, .. } = Lab::from(&xyz);
 
             let index_u64 = u64::from_usize(index);
             let x = F::from_u64(index_u64 / 4 % width_u64);

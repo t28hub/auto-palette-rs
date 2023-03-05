@@ -1,18 +1,22 @@
+use crate::color::white_point::{WhitePoint, D65};
 use crate::color::xyz::XYZ;
 use crate::math::number::Float;
 use std::fmt::{Display, Formatter};
+use std::marker::PhantomData;
 
 /// Color in CIE L*a*b* color space.
 #[derive(Debug, Clone, PartialEq)]
-pub struct Lab<F: Float> {
+pub struct Lab<F: Float, W: WhitePoint<F> = D65> {
     pub l: F,
     pub a: F,
     pub b: F,
+    _w: PhantomData<W>,
 }
 
-impl<F> Lab<F>
+impl<F, W> Lab<F, W>
 where
     F: Float,
+    W: WhitePoint<F>,
 {
     /// Create a color in CIE L*a*b* color space.
     #[inline]
@@ -22,6 +26,7 @@ where
             l: Self::normalize_l(l),
             a: Self::normalize_a(a),
             b: Self::normalize_b(b),
+            _w: PhantomData::default(),
         }
     }
 
@@ -86,21 +91,23 @@ where
     }
 }
 
-impl<F> Display for Lab<F>
+impl<F, W> Display for Lab<F, W>
 where
     F: Float + Display,
+    W: WhitePoint<F>,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "Lab({l}, {a}, {b})", l = self.l, a = self.a, b = self.b)
     }
 }
 
-impl<F> From<&XYZ<F>> for Lab<F>
+impl<F, W> From<&XYZ<F, W>> for Lab<F, W>
 where
     F: Float,
+    W: WhitePoint<F>,
 {
     #[inline]
-    fn from(xyz: &XYZ<F>) -> Self {
+    fn from(xyz: &XYZ<F, W>) -> Self {
         let epsilon = F::from_f64(6.0 / 29.0).powi(3);
         let kappa = F::from_f64(841.0 / 108.0); // ((29.0 / 6.0) ^ 2) / 3.0
         let delta = F::from_f64(4.0 / 29.0);
@@ -112,10 +119,9 @@ where
             }
         };
 
-        // TODO: Define D65 struct
-        let fx = f(xyz.x / F::from_f64(0.95046));
-        let fy = f(xyz.y / F::from_f64(1.0));
-        let fz = f(xyz.z / F::from_f64(1.08906));
+        let fx = f(xyz.x / W::x());
+        let fy = f(xyz.y / W::y());
+        let fz = f(xyz.z / W::z());
 
         let l = F::from_f64(116.0) * fy - F::from_f64(16.0);
         let a = F::from_f64(500.0) * (fx - fy);
@@ -131,17 +137,17 @@ mod tests {
 
     #[test]
     fn new_should_create_lab_color() {
-        let lab = Lab::new(53.23, 80.11, 67.22);
+        let lab: Lab<f64, D65> = Lab::new(53.23, 80.11, 67.22);
         assert_eq!(lab.l, 53.23);
         assert_eq!(lab.a, 80.11);
         assert_eq!(lab.b, 67.22);
 
-        let lab = Lab::new(-4.0, -192.0, -192.0);
+        let lab: Lab<f64, D65> = Lab::new(-4.0, -192.0, -192.0);
         assert_eq!(lab.l, 0.0);
         assert_eq!(lab.a, -128.0);
         assert_eq!(lab.b, -128.0);
 
-        let lab = Lab::new(108.0, 128.0, 128.0);
+        let lab: Lab<f64, D65> = Lab::new(108.0, 128.0, 128.0);
         assert_eq!(lab.l, 100.0);
         assert_eq!(lab.a, 127.0);
         assert_eq!(lab.b, 127.0);
@@ -149,34 +155,34 @@ mod tests {
 
     #[test]
     fn to_string_should_return_string_representation() {
-        let lab = Lab::new(53.23, 80.11, 67.22);
+        let lab: Lab<f64, D65> = Lab::new(53.23, 80.11, 67.22);
         assert_eq!(lab.to_string(), "Lab(53.23, 80.11, 67.22)");
     }
 
     #[test]
     fn from_xyz_should_convert_to_lab() {
-        let black = XYZ::from(&Rgba::black());
+        let black: XYZ<f64, D65> = XYZ::from(&Rgba::black());
         assert_eq!(Lab::from(&black), Lab::new(0.0, 0.0, 0.0));
 
-        let white = XYZ::from(&Rgba::white());
+        let white: XYZ<f64, D65> = XYZ::from(&Rgba::white());
         assert_eq!(
             Lab::from(&white),
             Lab::new(100.0, -0.0007014157375473395, 0.0254686291692785)
         );
 
-        let red = XYZ::from(&Rgba::red());
+        let red: XYZ<f64, D65> = XYZ::from(&Rgba::red());
         assert_eq!(
             Lab::from(&red),
             Lab::new(53.23711495815769, 80.08963699438709, 67.2031352432351)
         );
 
-        let green = XYZ::from(&Rgba::green());
+        let green: XYZ<f64, D65> = XYZ::from(&Rgba::green());
         assert_eq!(
             Lab::from(&green),
             Lab::new(87.73553464128194, -86.18229362351477, 83.1866539998871)
         );
 
-        let blue = XYZ::from(&Rgba::blue());
+        let blue: XYZ<f64, D65> = XYZ::from(&Rgba::blue());
         assert_eq!(
             Lab::from(&blue),
             Lab::new(32.30080257229819, 79.1952752634909, -107.85544501392465)
