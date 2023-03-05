@@ -1,2 +1,1 @@
-pub(crate) mod euclidean;
-pub(crate) mod traits;
+pub(crate) mod metric;

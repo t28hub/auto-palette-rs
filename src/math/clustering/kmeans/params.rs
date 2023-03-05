@@ -1,35 +1,33 @@
 use crate::math::clustering::kmeans::init::Initializer;
-use crate::math::distance::traits::DistanceMeasure;
+use crate::math::distance::metric::DistanceMetric;
 use crate::math::number::Float;
 use rand::Rng;
 
 /// A struct representing the parameters of Kmeans.
 #[derive(Clone, Debug, PartialEq)]
-pub(crate) struct KmeansParams<F, D, R>
+pub(crate) struct KmeansParams<F, R>
 where
     F: Float,
-    D: DistanceMeasure,
     R: Rng + Clone,
 {
     k: usize,
     max_iterations: usize,
     tolerance: F,
-    distance: D,
+    metric: DistanceMetric,
     initializer: Initializer<R>,
 }
 
-impl<F, D, R> KmeansParams<F, D, R>
+impl<F, R> KmeansParams<F, R>
 where
     F: Float,
-    D: DistanceMeasure,
     R: Rng + Clone,
 {
-    pub fn new(k: usize, distance: D, initializer: Initializer<R>) -> Self {
+    pub fn new(k: usize, metric: DistanceMetric, initializer: Initializer<R>) -> Self {
         Self {
             k,
             max_iterations: 10,
             tolerance: F::from_f32(0.0001),
-            distance,
+            metric,
             initializer,
         }
     }
@@ -56,8 +54,8 @@ where
         self.tolerance
     }
 
-    pub fn distance(&self) -> &D {
-        &self.distance
+    pub fn metric(&self) -> &DistanceMetric {
+        &self.metric
     }
 
     pub fn initializer(&self) -> &Initializer<R> {
@@ -68,15 +66,17 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::math::clustering::kmeans::init::Initializer::KmeansPlusPlus;
-    use crate::math::distance::euclidean::SquaredEuclideanDistance;
     use rand::thread_rng;
 
     #[test]
     fn should_create_params() {
-        let params = KmeansParams::new(5, SquaredEuclideanDistance, KmeansPlusPlus(thread_rng()))
-            .with_tolerance(0.025)
-            .with_max_iterations(25);
+        let params = KmeansParams::new(
+            5,
+            DistanceMetric::SquaredEuclidean,
+            Initializer::KmeansPlusPlus(thread_rng()),
+        )
+        .with_tolerance(0.025)
+        .with_max_iterations(25);
         assert_eq!(params.k(), 5);
         assert_eq!(params.tolerance(), 0.025);
         assert_eq!(params.max_iterations(), 25);

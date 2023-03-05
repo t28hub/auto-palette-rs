@@ -5,7 +5,7 @@ use crate::color::xyz::XYZ;
 use crate::math::clustering::dbscan::algorithm::DBSCAN;
 use crate::math::clustering::dbscan::params::Params;
 use crate::math::clustering::traits::Fit;
-use crate::math::distance::euclidean::EuclideanDistance;
+use crate::math::distance::metric::DistanceMetric;
 use crate::math::number::{Float, Number};
 use crate::math::point::Point5;
 use crate::swatch::Swatch;
@@ -63,7 +63,7 @@ impl<'a> ImageData<'a> {
             index += 4;
         }
 
-        let params = Params::new(25, F::from_f64(0.025), EuclideanDistance);
+        let params = Params::new(25, F::from_f64(0.025), DistanceMetric::Euclidean);
         let dbscan = DBSCAN::fit(&pixels, &params);
         let mut swatches: Vec<Swatch<F>> = dbscan
             .centroids()

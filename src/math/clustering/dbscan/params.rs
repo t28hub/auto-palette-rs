@@ -1,30 +1,28 @@
-use crate::math::distance::traits::DistanceMeasure;
+use crate::math::distance::metric::DistanceMetric;
 use crate::math::number::Float;
 
 /// Parameters of DBSCAN clustering algorithm.
 #[derive(Debug, Clone, PartialEq)]
-pub struct Params<F, D>
+pub struct Params<F>
 where
     F: Float,
-    D: DistanceMeasure,
 {
     min_points: usize,
     epsilon: F,
-    distance: D,
+    metric: DistanceMetric,
 }
 
-impl<F, D> Params<F, D>
+impl<F> Params<F>
 where
     F: Float,
-    D: DistanceMeasure,
 {
     /// Create a new Params with required parameters.
     #[must_use]
-    pub fn new(min_points: usize, epsilon: F, distance: D) -> Self {
+    pub fn new(min_points: usize, epsilon: F, metric: DistanceMetric) -> Self {
         Self {
             min_points,
             epsilon,
-            distance,
+            metric,
         }
     }
 
@@ -40,31 +38,22 @@ where
         self.epsilon
     }
 
-    /// Return the distance measure.
+    /// Return the distance metric.
     #[must_use]
-    pub fn distance(&self) -> &D {
-        &self.distance
+    pub fn metric(&self) -> &DistanceMetric {
+        &self.metric
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::math::distance::euclidean::SquaredEuclideanDistance;
 
     #[test]
     fn new_should_create_params() {
-        let params = Params::new(16, 5.0, SquaredEuclideanDistance);
-        assert_eq!(
-            params,
-            Params {
-                min_points: 16,
-                epsilon: 5.0,
-                distance: SquaredEuclideanDistance,
-            }
-        );
+        let params = Params::new(16, 5.0, DistanceMetric::SquaredEuclidean);
         assert_eq!(params.min_points(), 16);
         assert_eq!(params.epsilon(), 5.0);
-        assert_eq!(params.distance(), &SquaredEuclideanDistance);
+        assert_eq!(params.metric(), &DistanceMetric::SquaredEuclidean);
     }
 }

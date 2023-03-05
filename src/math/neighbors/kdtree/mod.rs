@@ -1,4 +1,4 @@
-use crate::math::distance::traits::DistanceMeasure;
+use crate::math::distance::metric::DistanceMetric;
 use crate::math::neighbors::nns::{Neighbor, NeighborSearch};
 use crate::math::number::Float;
 use crate::math::point::Point;
@@ -14,33 +14,31 @@ mod node;
 
 /// A nearest neighbor search using KDTree.
 #[derive(Debug)]
-pub(crate) struct KDTree<'a, F, P, D>
+pub(crate) struct KDTree<'a, F, P>
 where
     F: Float,
     P: Point<F>,
-    D: DistanceMeasure,
 {
     _t: PhantomData<F>,
     root: Option<Box<Node>>,
     dataset: &'a Vec<P>,
-    distance: &'a D,
+    metric: &'a DistanceMetric,
 }
 
-impl<'a, F, P, D> KDTree<'a, F, P, D>
+impl<'a, F, P> KDTree<'a, F, P>
 where
     F: Float,
     P: Point<F>,
-    D: DistanceMeasure + 'a,
 {
     /// Create a new KDTree.
-    pub fn new(dataset: &'a Vec<P>, distance: &'a D) -> Self {
+    pub fn new(dataset: &'a Vec<P>, metric: &'a DistanceMetric) -> Self {
         let mut indices: Vec<usize> = (0..dataset.len()).collect();
         let root = Self::build_node(dataset, &mut indices, 0);
         KDTree {
             _t: PhantomData::default(),
             root: root.map(Box::new),
             dataset,
-            distance,
+            metric,
         }
     }
 
@@ -58,7 +56,7 @@ where
         let index = node.index();
         let point = self.dataset[index];
         let element = {
-            let distance = self.distance.measure(&point, query);
+            let distance = self.metric.measure(&point, query);
             Element::new(index, distance)
         };
         heap.push(element);
@@ -94,7 +92,7 @@ where
 
         let index = node.index();
         let point = self.dataset[index];
-        let distance = self.distance.measure(&point, query);
+        let distance = self.metric.measure(&point, query);
         if distance <= radius {
             results.push(Element::new(index, distance));
         }
@@ -138,11 +136,10 @@ where
     }
 }
 
-impl<F, P, D> NeighborSearch<F, P> for KDTree<'_, F, P, D>
+impl<F, P> NeighborSearch<F, P> for KDTree<'_, F, P>
 where
     F: Float,
     P: Point<F>,
-    D: DistanceMeasure,
 {
     fn search(&self, query: &P, k: usize) -> Vec<Neighbor<F>> {
         if k < 1 {
@@ -185,7 +182,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::math::distance::euclidean::SquaredEuclideanDistance;
     use crate::math::point::Point2;
 
     const DATASET: [Point2<f32>; 8] = [
@@ -202,7 +198,7 @@ mod tests {
     #[test]
     fn search_should_return_knearest_neighbors() {
         let dataset = Vec::from(DATASET);
-        let kdtree = KDTree::new(&dataset, &SquaredEuclideanDistance);
+        let kdtree = KDTree::new(&dataset, &DistanceMetric::SquaredEuclidean);
         assert_eq!(kdtree.search(&Point2(3.0, 3.0), 0), vec![]);
         assert_eq!(
             kdtree.search(&Point2(3.0, 3.0), 1),
@@ -230,7 +226,7 @@ mod tests {
     #[test]
     fn search_should_return_neighbors_within_radius() {
         let dataset = Vec::from(DATASET);
-        let kdtree = KDTree::new(&dataset, &SquaredEuclideanDistance);
+        let kdtree = KDTree::new(&dataset, &DistanceMetric::SquaredEuclidean);
         assert_eq!(kdtree.search_radius(&Point2(3.0, 3.0), -1.0), vec![]);
         assert_eq!(kdtree.search_radius(&Point2(3.0, 3.0), 1.0), vec![]);
         assert_eq!(

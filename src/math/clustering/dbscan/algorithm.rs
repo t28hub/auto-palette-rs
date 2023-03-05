@@ -1,7 +1,6 @@
 use crate::math::clustering::dbscan::label::Label;
 use crate::math::clustering::dbscan::params::Params;
 use crate::math::clustering::traits::Fit;
-use crate::math::distance::traits::DistanceMeasure;
 use crate::math::neighbors::kdtree::KDTree;
 use crate::math::neighbors::nns::{Neighbor, NeighborSearch};
 use crate::math::number::Float;
@@ -47,15 +46,14 @@ where
         self.outliers.clone()
     }
 
-    fn expand_cluster<D, N>(
+    fn expand_cluster<N>(
         cluster_id: usize,
         dataset: &[P],
-        params: &Params<F, D>,
+        params: &Params<F>,
         ns: &N,
         neighbors: &[Neighbor<F>],
         labels: &mut [Label],
     ) where
-        D: DistanceMeasure,
         N: NeighborSearch<F, P>,
     {
         let mut queue = VecDeque::new();
@@ -95,14 +93,13 @@ where
     }
 }
 
-impl<F, P, D> Fit<F, P, Params<F, D>> for DBSCAN<F, P>
+impl<F, P> Fit<F, P, Params<F>> for DBSCAN<F, P>
 where
     F: Float,
     P: Point<F>,
-    D: DistanceMeasure,
 {
     #[must_use]
-    fn fit(dataset: &[P], params: &Params<F, D>) -> Self {
+    fn fit(dataset: &[P], params: &Params<F>) -> Self {
         if dataset.is_empty() {
             return DBSCAN {
                 _t: PhantomData::default(),
@@ -113,7 +110,7 @@ where
         }
 
         let dataset_vec = dataset.to_vec();
-        let nns = KDTree::new(&dataset_vec, params.distance());
+        let nns = KDTree::new(&dataset_vec, params.metric());
         let mut labels = vec![Label::Undefined; dataset.len()];
         let mut cluster_id: usize = 0;
         for (index, point) in dataset.iter().enumerate() {
@@ -178,7 +175,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::math::distance::euclidean::EuclideanDistance;
+    use crate::math::distance::metric::DistanceMetric;
     use crate::math::point::Point2;
 
     const DATASET: [Point2<f64>; 16] = [
@@ -203,7 +200,7 @@ mod tests {
     #[test]
     fn fit_should_fit_dataset() {
         let dataset = Vec::from(DATASET);
-        let params = Params::new(4, 2.0_f64.sqrt(), EuclideanDistance);
+        let params = Params::new(4, 2.0_f64.sqrt(), DistanceMetric::Euclidean);
         let dbscan = DBSCAN::fit(&dataset, &params);
 
         let mut centroids = dbscan.centroids();

@@ -1,4 +1,4 @@
-use crate::math::distance::traits::DistanceMeasure;
+use crate::math::distance::metric::DistanceMetric;
 use crate::math::number::Float;
 use crate::math::point::Point;
 use rand::Rng;
@@ -19,11 +19,11 @@ impl<R> Initializer<R>
 where
     R: Rng + Clone,
 {
-    pub(crate) fn initialize<F: Float, P: Point<F>, D: DistanceMeasure>(
+    pub(crate) fn initialize<F: Float, P: Point<F>>(
         &self,
         dataset: &[P],
         k: usize,
-        distance: &D,
+        metric: &DistanceMetric,
     ) -> Vec<P> {
         if k == 0 {
             return vec![];
@@ -36,7 +36,7 @@ where
         match self {
             Self::Random(rng) => Self::random(dataset, k, &mut rng.clone()),
             Self::KmeansPlusPlus(rng) => {
-                Self::kmeans_plus_plus(dataset, k, distance, &mut rng.clone())
+                Self::kmeans_plus_plus(dataset, k, metric, &mut rng.clone())
             }
         }
     }
@@ -59,10 +59,10 @@ where
         centroids
     }
 
-    fn kmeans_plus_plus<F: Float, P: Point<F>, D: DistanceMeasure>(
+    fn kmeans_plus_plus<F: Float, P: Point<F>>(
         dataset: &[P],
         k: usize,
-        distance: &D,
+        metric: &DistanceMetric,
         rng: &mut R,
     ) -> Vec<P> {
         let mut selected = vec![false; dataset.len()];
@@ -82,7 +82,7 @@ where
 
                     let min_distance = centroids
                         .iter()
-                        .map(|centroid| distance.measure(point, centroid))
+                        .map(|centroid| metric.measure(point, centroid))
                         .min_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Greater));
                     if let Some(min) = min_distance {
                         (index, min)
@@ -105,8 +105,8 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::math::clustering::kmeans::init::Initializer::{KmeansPlusPlus, Random};
-    use crate::math::distance::euclidean::{EuclideanDistance, SquaredEuclideanDistance};
+    use crate::math::clustering::kmeans::init::Initializer;
+    use crate::math::distance::metric::DistanceMetric;
     use crate::math::point::Point2;
     use rand::thread_rng;
 
@@ -119,9 +119,8 @@ mod tests {
             Point2(5.0, 5.0),
             Point2(2.0, 4.0),
         ];
-        let distance = EuclideanDistance;
-        let initializer = Random(thread_rng());
-        let result = initializer.initialize(&dataset, 2, &distance);
+        let initializer = Initializer::Random(thread_rng());
+        let result = initializer.initialize(&dataset, 2, &DistanceMetric::Euclidean);
         assert_eq!(result.len(), 2);
     }
 
@@ -134,9 +133,8 @@ mod tests {
             Point2(5.0, 5.0),
             Point2(2.0, 4.0),
         ];
-        let distance = SquaredEuclideanDistance;
-        let initializer = KmeansPlusPlus(thread_rng());
-        let result = initializer.initialize(&dataset, 2, &distance);
+        let initializer = Initializer::KmeansPlusPlus(thread_rng());
+        let result = initializer.initialize(&dataset, 2, &DistanceMetric::SquaredEuclidean);
         assert_eq!(result.len(), 2);
     }
 }

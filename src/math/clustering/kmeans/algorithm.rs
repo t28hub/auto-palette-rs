@@ -1,7 +1,7 @@
 use crate::math::clustering::kmeans::cluster::Cluster;
 use crate::math::clustering::kmeans::params::KmeansParams;
 use crate::math::clustering::traits::Fit;
-use crate::math::distance::traits::DistanceMeasure;
+use crate::math::distance::metric::DistanceMetric;
 use crate::math::neighbors::kdtree::KDTree;
 use crate::math::neighbors::nns::NeighborSearch;
 use crate::math::number::Float;
@@ -35,10 +35,10 @@ where
         cluster.map_or(0, |c| c.size())
     }
 
-    fn reassign<D: DistanceMeasure>(
+    fn reassign(
         dataset: &[P],
         clusters: &mut [Cluster<F, P>],
-        distance: &D,
+        metric: &DistanceMetric,
         tolerance: F,
     ) -> bool {
         let mut centroids = Vec::with_capacity(clusters.len());
@@ -47,7 +47,7 @@ where
             cluster.clear();
         }
 
-        let nns = KDTree::new(&centroids, distance);
+        let nns = KDTree::new(&centroids, metric);
         dataset.iter().enumerate().for_each(|(index, data)| {
             let result = nns.search_nearest(data);
             if let Some(nearest) = result {
@@ -69,7 +69,7 @@ where
 
                 cluster.update_centroid();
 
-                let difference = distance.measure(&old_centroid, cluster.centroid());
+                let difference = metric.measure(&old_centroid, cluster.centroid());
                 if difference < tolerance {
                     converged = true;
                 }
@@ -78,14 +78,13 @@ where
     }
 }
 
-impl<F, P, D, R> Fit<F, P, KmeansParams<F, D, R>> for Kmeans<F, P>
+impl<F, P, R> Fit<F, P, KmeansParams<F, R>> for Kmeans<F, P>
 where
     F: Float,
     P: Point<F>,
-    D: DistanceMeasure,
     R: Rng + Clone,
 {
-    fn fit(dataset: &[P], params: &KmeansParams<F, D, R>) -> Self {
+    fn fit(dataset: &[P], params: &KmeansParams<F, R>) -> Self {
         if params.k() == 0 {
             return Self {
                 _t: PhantomData::default(),
@@ -111,17 +110,13 @@ where
 
         let mut clusters: Vec<Cluster<F, P>> = params
             .initializer()
-            .initialize(dataset, params.k(), params.distance())
+            .initialize(dataset, params.k(), params.metric())
             .iter()
             .map(|centroid| Cluster::new(centroid))
             .collect();
         for _ in 0..params.max_iterations() {
-            let converged = Self::reassign(
-                dataset,
-                &mut clusters,
-                params.distance(),
-                params.tolerance(),
-            );
+            let converged =
+                Self::reassign(dataset, &mut clusters, params.metric(), params.tolerance());
             if converged {
                 break;
             }
@@ -136,9 +131,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::math::clustering::kmeans::init::Initializer::KmeansPlusPlus;
+    use crate::math::clustering::kmeans::init::Initializer;
     use crate::math::clustering::traits::Fit;
-    use crate::math::distance::euclidean::SquaredEuclideanDistance;
     use crate::math::point::Point2;
     use rand::thread_rng;
 
@@ -151,9 +145,9 @@ mod tests {
             Point2(5.0, 5.0),
             Point2(2.0, 4.0),
         ];
-        let distance = SquaredEuclideanDistance;
-        let initializer = KmeansPlusPlus(thread_rng());
-        let mut params = KmeansParams::new(2, distance, initializer);
+        let metric = DistanceMetric::SquaredEuclidean;
+        let initializer = Initializer::KmeansPlusPlus(thread_rng());
+        let mut params = KmeansParams::new(2, metric, initializer);
         let _kmeans = Kmeans::fit(&dataset, &mut params);
     }
 }
