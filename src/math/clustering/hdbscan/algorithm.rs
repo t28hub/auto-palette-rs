@@ -16,9 +16,9 @@ impl HDBSCAN {
 }
 
 impl<F, P> Fit<F, P, Params> for HDBSCAN
-    where
-        F: Float,
-        P: Point<F>,
+where
+    F: Float,
+    P: Point<F>,
 {
     fn fit(dataset: &[P], params: &Params) -> Self {
         if dataset.is_empty() {

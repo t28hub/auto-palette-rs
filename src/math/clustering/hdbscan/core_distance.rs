@@ -10,11 +10,16 @@ pub(crate) struct CoreDistance<F: Float> {
     distances: Vec<F>,
 }
 
-impl<F> CoreDistance<F> where F: Float {
+impl<F> CoreDistance<F>
+where
+    F: Float,
+{
     /// Create a core distance for the given dataset.
     pub fn new<P: Point<F>>(dataset: &[P], min_samples: usize, metric: &DistanceMetric) -> Self {
         if dataset.is_empty() {
-            return Self { distances: Vec::new() };
+            return Self {
+                distances: Vec::new(),
+            };
         }
 
         let k = dataset.len().min(min_samples + 1);
@@ -41,8 +46,8 @@ impl<F> CoreDistance<F> where F: Float {
 
 #[cfg(test)]
 mod tests {
-    use crate::math::point::Point2;
     use super::*;
+    use crate::math::point::Point2;
 
     #[test]
     fn new_should_create_core_distance() {
