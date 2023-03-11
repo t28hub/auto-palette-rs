@@ -12,9 +12,8 @@ impl UnionFind {
     /// n - The number of nodes.
     pub fn new(n: usize) -> Self {
         assert!(n > 0);
-        let parent: Vec<usize> = (0..2 * n).into_iter().collect();
+        let parent: Vec<usize> = (0..2 * n).collect();
         let size: Vec<usize> = (0..2 * n)
-            .into_iter()
             .map(|index| if index < n { 1 } else { 0 })
             .collect();
         Self {
@@ -65,11 +64,14 @@ mod tests {
 
     #[test]
     fn new_should_create_union_find() {
-        assert_eq!(UnionFind::new(3), UnionFind {
-            parent: vec![0, 1, 2, 3, 4, 5],
-            size: vec![1, 1, 1, 0, 0, 0],
-            next_label: 3,
-        })
+        assert_eq!(
+            UnionFind::new(3),
+            UnionFind {
+                parent: vec![0, 1, 2, 3, 4, 5],
+                size: vec![1, 1, 1, 0, 0, 0],
+                next_label: 3,
+            }
+        )
     }
 
     #[test]
