@@ -3,7 +3,7 @@ use crate::math::number::Float;
 use std::collections::{BinaryHeap, HashSet};
 
 /// Trait for spanning tree.
-trait SpanningTree<F: Float, E: Edge> {
+pub trait SpanningTree<F: Float, E: Edge> {
     /// Return total weight of this spanning tree.
     fn weight(&self) -> F;
 
@@ -13,7 +13,7 @@ trait SpanningTree<F: Float, E: Edge> {
 
 /// Minimum spanning tree struct.
 #[derive(Debug, Clone)]
-struct MinimumSpanningTree<F: Float> {
+pub struct MinimumSpanningTree<F: Float> {
     weight: F,
     edges: Vec<WeightedEdge<F>>,
 }

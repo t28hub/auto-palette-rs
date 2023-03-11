@@ -83,7 +83,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::f64::NAN;
     use super::*;
 
     #[test]

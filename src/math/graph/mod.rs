@@ -1,2 +1,2 @@
-mod edge;
-mod spanning_tree;
+pub mod edge;
+pub mod spanning_tree;
